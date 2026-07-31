@@ -1,0 +1,28 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+.kotlin
+local.properties
+
+# Build outputs (in case of nested modules without their own .gitignore)
+**/build/
+
+# Signing keys / secrets
+*.jks
+*.keystore
+keystore.properties
+
+# Log/crash files
+*.log
+*.hprof
