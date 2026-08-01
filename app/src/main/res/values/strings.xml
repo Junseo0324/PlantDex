@@ -1,3 +1,42 @@
 <resources>
     <string name="app_name">PlantDex</string>
+
+    <!-- 분석 화면: 대기 -->
+    <string name="analyze_eyebrow">PLANT DEX</string>
+    <string name="analyze_title">식물을 도감에 담아볼까요</string>
+    <string name="analyze_hint">사진을 분석해 이름과 키우는 방법을 알려드려요.</string>
+    <string name="analyze_photo_placeholder">사진 자리 (임시)</string>
+    <string name="analyze_cta">분석하기</string>
+
+    <!-- 분석 화면: 진행 중 -->
+    <string name="analyze_loading_title">분석 중이에요</string>
+    <string name="analyze_loading_body">사진 속 식물을 살펴보고 있어요.</string>
+
+    <!-- 분석 화면: 결과 -->
+    <string name="analyze_section_basic_info">기본 정보</string>
+    <string name="analyze_discovered_at">%1$s 발견</string>
+    <string name="analyze_reset">다시 분석하기</string>
+    <string name="analyze_retry">다시 시도</string>
+
+    <!-- 스펙 -->
+    <string name="spec_watering">물 주기</string>
+    <string name="spec_sunlight">햇빛</string>
+    <string name="spec_origin">원산지</string>
+    <string name="spec_difficulty">난이도</string>
+    <string name="spec_difficulty_description">난이도 %1$d/5</string>
+
+    <!-- 햇빛 -->
+    <string name="sunlight_full_sun">양지</string>
+    <string name="sunlight_bright_indirect">밝은 간접광</string>
+    <string name="sunlight_partial_shade">반음지</string>
+    <string name="sunlight_shade">음지</string>
+    <string name="sunlight_unknown">정보 없음</string>
+
+    <!-- 에러 -->
+    <string name="error_not_a_plant_title">식물이 아닌 것 같아요</string>
+    <string name="error_not_a_plant_body">식물이 화면에 잘 담기도록 다시 찍어주세요.</string>
+    <string name="error_network_title">연결에 문제가 있어요</string>
+    <string name="error_network_body">네트워크 상태를 확인한 뒤 다시 시도해주세요.</string>
+    <string name="error_generic_title">분석에 실패했어요</string>
+    <string name="error_generic_body">잠시 후 다시 시도해주세요.</string>
 </resources>
