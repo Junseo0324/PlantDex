@@ -10,7 +10,7 @@ import dagger.hilt.components.SingletonComponent
 /**
  * 실제 AI 프로바이더가 정해지면 여기 바인딩만 갈아끼우면 된다.
  */
-@Module가
+@Module
 @InstallIn(SingletonComponent::class)
 abstract class AnalysisModule {
 
