@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.devhjs.plantdex.R
 import com.devhjs.plantdex.domain.model.AnalysisError
 
+// analyze error text
 @StringRes
 fun AnalysisError.titleRes(): Int = when (this) {
     AnalysisError.NotAPlant -> R.string.error_not_a_plant_title
