@@ -1,5 +1,7 @@
 package com.devhjs.plantdex.presentation.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -34,25 +36,31 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
             ),
             entryProvider = entryProvider {
                 entry<Route.Home> {
-                    PlaceholderScreen(
-                        title = "홈",
-                        actions = listOf(
-                            "식물 발견하기" to { backStack.add(Route.Camera) },
-                            "도감" to { backStack.switchTab(Route.Collection) },
-                        ),
-                    )
+                    TabScaffold(Route.Home, backStack::switchTab) {
+                        PlaceholderScreen(
+                            title = "홈",
+                            actions = listOf("식물 발견하기" to { backStack.add(Route.Camera) }),
+                        )
+                    }
                 }
                 entry<Route.Collection> {
-                    PlaceholderScreen(
-                        title = "나의 도감",
-                        actions = listOf(
-                            "상세 열기" to { backStack.add(Route.Detail(entryId = 1L)) },
-                            "홈" to { backStack.switchTab(Route.Home) },
-                        ),
-                    )
+                    TabScaffold(Route.Collection, backStack::switchTab) {
+                        PlaceholderScreen(
+                            title = "나의 도감",
+                            actions = listOf(
+                                "상세 열기" to { backStack.add(Route.Detail(entryId = 1L)) },
+                            ),
+                        )
+                    }
                 }
-                entry<Route.Map> { PlaceholderScreen(title = "지도") }
-                entry<Route.Profile> { PlaceholderScreen(title = "내정보") }
+                entry<Route.Map> {
+                    TabScaffold(Route.Map, backStack::switchTab) { PlaceholderScreen(title = "지도") }
+                }
+                entry<Route.Profile> {
+                    TabScaffold(Route.Profile, backStack::switchTab) {
+                        PlaceholderScreen(title = "내정보")
+                    }
+                }
 
                 entry<Route.Camera> {
                     PlaceholderScreen(
@@ -75,6 +83,19 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                 }
             },
         )
+    }
+}
+
+/** 탭 화면 공통 뼈대. 본문 아래에 바텀 네비를 깐다. */
+@Composable
+private fun TabScaffold(
+    selected: Route.Tab,
+    onSelectTab: (Route.Tab) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) { content() }
+        BottomNavBar(selected = selected, onSelect = onSelectTab)
     }
 }
 
