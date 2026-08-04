@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -79,7 +80,12 @@ private fun IdleContent(onAction: (AnalyzeAction) -> Unit) {
         Text(text = stringResource(R.string.analyze_hint), style = AppTextStyles.BodyMuted)
     }
 
-    PhotoPlaceholder(caption = stringResource(R.string.analyze_photo_placeholder))
+    PhotoPlaceholder(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        caption = stringResource(R.string.analyze_photo_placeholder),
+    )
 
     PrimaryCta(
         text = stringResource(R.string.analyze_cta),
