@@ -1,6 +1,6 @@
 package com.devhjs.plantdex.core.di
 
-import com.devhjs.plantdex.data.repository.InMemoryDexRepository
+import com.devhjs.plantdex.data.repository.MockDexRepositoryImpl
 import com.devhjs.plantdex.domain.repository.DexRepository
 import dagger.Binds
 import dagger.Module
@@ -15,5 +15,5 @@ import dagger.hilt.components.SingletonComponent
 abstract class RepositoryModule {
 
     @Binds
-    abstract fun bindDexRepository(repository: InMemoryDexRepository): DexRepository
+    abstract fun bindDexRepository(repository: MockDexRepositoryImpl): DexRepository
 }
