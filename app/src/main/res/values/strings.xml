@@ -39,4 +39,10 @@
     <string name="error_network_body">네트워크 상태를 확인한 뒤 다시 시도해주세요.</string>
     <string name="error_generic_title">분석에 실패했어요</string>
     <string name="error_generic_body">잠시 후 다시 시도해주세요.</string>
+
+    <!-- 바텀 네비 -->
+    <string name="nav_home">홈</string>
+    <string name="nav_collection">도감</string>
+    <string name="nav_map">지도</string>
+    <string name="nav_profile">내정보</string>
 </resources>
