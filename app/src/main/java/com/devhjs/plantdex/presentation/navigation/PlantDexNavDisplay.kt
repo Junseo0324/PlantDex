@@ -1,0 +1,95 @@
+package com.devhjs.plantdex.presentation.navigation
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.devhjs.plantdex.presentation.analyze.AnalyzeScreenRoot
+import com.devhjs.plantdex.presentation.designsystem.AppColors
+
+@Composable
+fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
+    val backStack = rememberNavBackStack(Route.Home)
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = AppColors.Cream,
+    ) { innerPadding ->
+        NavDisplay(
+            backStack = backStack,
+            modifier = Modifier.padding(innerPadding),
+            onBack = { backStack.popOrIgnore() },
+            // SceneSetup 데코레이터는 NavDisplay 가 내부에서 붙인다.
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                // 이게 있어야 각 entry 안에서 hiltViewModel() 이 entry 수명에 묶인다.
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+            entryProvider = entryProvider {
+                entry<Route.Home> {
+                    PlaceholderScreen(
+                        title = "홈",
+                        actions = listOf(
+                            "식물 발견하기" to { backStack.add(Route.Camera) },
+                            "도감" to { backStack.switchTab(Route.Collection) },
+                        ),
+                    )
+                }
+                entry<Route.Collection> {
+                    PlaceholderScreen(
+                        title = "나의 도감",
+                        actions = listOf(
+                            "상세 열기" to { backStack.add(Route.Detail(entryId = 1L)) },
+                            "홈" to { backStack.switchTab(Route.Home) },
+                        ),
+                    )
+                }
+                entry<Route.Map> { PlaceholderScreen(title = "지도") }
+                entry<Route.Profile> { PlaceholderScreen(title = "내정보") }
+
+                entry<Route.Camera> {
+                    PlaceholderScreen(
+                        title = "촬영",
+                        actions = listOf("촬영하기" to { backStack.add(Route.Analyze) }),
+                    )
+                }
+                entry<Route.Analyze> { AnalyzeScreenRoot() }
+                entry<Route.Reveal> { key ->
+                    PlaceholderScreen(
+                        title = "발견 연출",
+                        subtitle = "entryId=${key.entryId}",
+                        actions = listOf(
+                            "도감에 등록하기" to { backStack.finishDiscovery(key.entryId) },
+                        ),
+                    )
+                }
+                entry<Route.Detail> { key ->
+                    PlaceholderScreen(title = "상세", subtitle = "entryId=${key.entryId}")
+                }
+            },
+        )
+    }
+}
+
+/** 루트까지 비우면 NavDisplay 가 그릴 게 없어지므로 마지막 하나는 남긴다. */
+private fun MutableList<NavKey>.popOrIgnore() {
+    if (size > 1) removeAt(lastIndex)
+}
+
+private fun MutableList<NavKey>.switchTab(tab: Route.Tab) {
+    clear()
+    add(tab)
+}
+
+/** 발견 플로우(촬영 → 분석 → 연출)를 통째로 걷어내고 상세로 갈아끼운다. */
+private fun MutableList<NavKey>.finishDiscovery(entryId: Long) {
+    removeAll { it is Route.Camera || it is Route.Analyze || it is Route.Reveal }
+    add(Route.Detail(entryId))
+}
