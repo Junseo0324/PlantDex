@@ -23,6 +23,7 @@ object AppRadii {
     val photo = 26.dp     // 상세 사진
     val card = 22.dp      // 스탯 리스트
     val tile = 20.dp      // 그리드 카드 · 통계
+    val thumb = 18.dp     // 최근 발견 썸네일
     val button = 18.dp
     val field = 14.dp
     val pill = 999.dp
