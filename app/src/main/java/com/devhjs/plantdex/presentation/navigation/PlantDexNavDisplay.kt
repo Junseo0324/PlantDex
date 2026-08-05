@@ -15,6 +15,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.devhjs.plantdex.presentation.analyze.AnalyzeScreenRoot
 import com.devhjs.plantdex.presentation.designsystem.AppColors
+import com.devhjs.plantdex.presentation.home.HomeScreenRoot
 
 @Composable
 fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
@@ -37,9 +38,10 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
             entryProvider = entryProvider {
                 entry<Route.Home> {
                     TabScaffold(Route.Home, backStack::switchTab) {
-                        PlaceholderScreen(
-                            title = "홈",
-                            actions = listOf("식물 발견하기" to { backStack.add(Route.Camera) }),
+                        HomeScreenRoot(
+                            onDiscover = { backStack.add(Route.Camera) },
+                            onSeeAllCollection = { backStack.switchTab(Route.Collection) },
+                            onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
                         )
                     }
                 }
