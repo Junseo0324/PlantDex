@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.core.util
 
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Instant
@@ -10,3 +11,13 @@ import kotlin.time.Instant
  */
 fun Instant.toKoreanDate(): String =
     SimpleDateFormat("yyyy년 M월 d일", Locale.KOREA).format(Date(toEpochMilliseconds()))
+
+fun Instant.isSameMonthAs(other: Instant): Boolean {
+    val a = toCalendar()
+    val b = other.toCalendar()
+    return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) &&
+        a.get(Calendar.MONTH) == b.get(Calendar.MONTH)
+}
+
+private fun Instant.toCalendar(): Calendar =
+    Calendar.getInstance().apply { timeInMillis = toEpochMilliseconds() }
