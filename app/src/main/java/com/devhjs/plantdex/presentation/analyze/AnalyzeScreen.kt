@@ -41,6 +41,9 @@ import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.AppSpacing
 import com.devhjs.plantdex.presentation.designsystem.AppTextStyles
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
+import com.devhjs.plantdex.presentation.text.bodyRes
+import com.devhjs.plantdex.presentation.text.labelRes
+import com.devhjs.plantdex.presentation.text.titleRes
 import kotlin.time.Instant
 
 @Composable
