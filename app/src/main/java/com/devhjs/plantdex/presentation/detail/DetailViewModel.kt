@@ -26,7 +26,6 @@ class DetailViewModel @Inject constructor(
     private var loadedId: Long? = null
     private var observeJob: Job? = null
 
-    /** Root 가 라우트에서 받은 id 로 한 번 호출한다. 같은 id 로 다시 불려도 재구독하지 않는다. */
     fun load(entryId: Long) {
         if (loadedId == entryId) return
         loadedId = entryId
