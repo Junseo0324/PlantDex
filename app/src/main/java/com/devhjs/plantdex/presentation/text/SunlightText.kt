@@ -1,4 +1,4 @@
-package com.devhjs.plantdex.presentation.analyze
+package com.devhjs.plantdex.presentation.text
 
 import androidx.annotation.StringRes
 import com.devhjs.plantdex.R
