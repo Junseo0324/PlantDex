@@ -1,4 +1,4 @@
-가package com.devhjs.plantdex.domain.usecase
+package com.devhjs.plantdex.domain.usecase
 
 import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.Plant
