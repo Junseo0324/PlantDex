@@ -228,6 +228,18 @@ class DetailViewModelTest {
     }
 
     @Test
+    fun `항목이 없으면 SaveMemo 가 아무것도 하지 않는다`() = runTest {
+        val viewModel = loadedSubject()
+        advanceUntilIdle()
+
+        viewModel.onAction(DetailAction.MemoDraftChanged("무시된다"))
+        viewModel.onAction(DetailAction.SaveMemo)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { saveMemo(any(), any()) }
+    }
+
+    @Test
     fun `DismissMemoEditor 는 저장하지 않고 draft 를 버린다`() = runTest {
         observed.value = entry()
         val viewModel = loadedSubject()
