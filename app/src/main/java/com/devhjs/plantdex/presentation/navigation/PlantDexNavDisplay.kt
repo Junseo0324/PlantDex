@@ -15,6 +15,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.devhjs.plantdex.presentation.analyze.AnalyzeScreenRoot
 import com.devhjs.plantdex.presentation.designsystem.AppColors
+import com.devhjs.plantdex.presentation.detail.DetailScreenRoot
 import com.devhjs.plantdex.presentation.home.HomeScreenRoot
 
 @Composable
@@ -81,7 +82,10 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                     )
                 }
                 entry<Route.Detail> { key ->
-                    PlaceholderScreen(title = "상세", subtitle = "entryId=${key.entryId}")
+                    DetailScreenRoot(
+                        entryId = key.entryId,
+                        onBack = { backStack.popOrIgnore() },
+                    )
                 }
             },
         )
