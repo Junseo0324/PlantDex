@@ -122,7 +122,6 @@ fun DetailScreen(
                 }
             }
 
-            // 디자인에는 없지만 저장한 메모를 볼 곳이 있어야 한다.
             entry.memo?.takeIf { it.isNotBlank() }?.let { memo ->
                 Column(
                     modifier = Modifier.padding(
