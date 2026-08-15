@@ -12,6 +12,10 @@ import kotlin.time.Instant
 fun Instant.toKoreanDate(): String =
     SimpleDateFormat("yyyy년 M월 d일", Locale.KOREA).format(Date(toEpochMilliseconds()))
 
+/** 2026.07.28 형태. 도감 헤더처럼 좁은 자리에 쓴다. */
+fun Instant.toDotDate(): String =
+    SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(Date(toEpochMilliseconds()))
+
 fun Instant.isSameMonthAs(other: Instant): Boolean {
     val a = toCalendar()
     val b = other.toCalendar()
