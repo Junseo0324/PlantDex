@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,7 +41,9 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppColors.Cream),
+            .background(AppColors.Cream)
+            // 화면이 짧거나 글꼴 배율이 크면 내용이 잘리므로 스크롤을 둔다.
+            .verticalScroll(rememberScrollState()),
     ) {
         AppTopBar(title = stringResource(R.string.home_title))
 

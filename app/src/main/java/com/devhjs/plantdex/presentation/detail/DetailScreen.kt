@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +40,8 @@ import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 import com.devhjs.plantdex.presentation.text.labelRes
 import kotlin.time.Instant
 
+private const val DETAIL_PHOTO_ASPECT_RATIO = 1.58f
+
 @Composable
 fun DetailScreen(
     state: DetailState,
@@ -57,25 +60,20 @@ fun DetailScreen(
 
         val entry = state.entry ?: return@Column
 
+        // 화면 좌우 여백은 여기서 한 번만 준다.
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = AppSpacing.screenH),
         ) {
             PhotoPlaceholder(
                 modifier = Modifier
-                    .padding(horizontal = AppSpacing.screenH)
                     .fillMaxWidth()
-                    .height(216.dp),
+                    .aspectRatio(DETAIL_PHOTO_ASPECT_RATIO),
             )
 
-            Column(
-                modifier = Modifier.padding(
-                    top = 22.dp,
-                    start = AppSpacing.screenH,
-                    end = AppSpacing.screenH,
-                ),
-            ) {
+            Column(modifier = Modifier.padding(top = 22.dp)) {
                 Text(text = entry.dexNumber.toDexLabel(), style = AppTextStyles.DexNumber)
                 Spacer(Modifier.height(6.dp))
                 Row(
@@ -89,13 +87,7 @@ fun DetailScreen(
                 Text(text = entry.plant.description, style = AppTextStyles.Body)
             }
 
-            SpecList(
-                modifier = Modifier.padding(
-                    top = 20.dp,
-                    start = AppSpacing.screenH,
-                    end = AppSpacing.screenH,
-                ),
-            ) {
+            SpecList(modifier = Modifier.padding(top = 20.dp)) {
                 SpecListRow(label = stringResource(R.string.spec_origin)) {
                     Text(text = entry.plant.origin, style = AppTextStyles.BodyStrong)
                 }
@@ -123,13 +115,7 @@ fun DetailScreen(
             }
 
             entry.memo?.takeIf { it.isNotBlank() }?.let { memo ->
-                Column(
-                    modifier = Modifier.padding(
-                        top = 24.dp,
-                        start = AppSpacing.screenH,
-                        end = AppSpacing.screenH,
-                    ),
-                ) {
+                Column(modifier = Modifier.padding(top = 24.dp)) {
                     SectionHeader(title = stringResource(R.string.detail_section_memo))
                     Spacer(Modifier.height(8.dp))
                     Text(text = memo, style = AppTextStyles.Body)
@@ -141,9 +127,9 @@ fun DetailScreen(
 
         Row(
             modifier = Modifier.padding(
-                top = 16.dp,
                 start = AppSpacing.screenH,
                 end = AppSpacing.screenH,
+                top = 16.dp,
                 bottom = 40.dp,
             ),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.gutter),
