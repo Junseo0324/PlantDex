@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class ObserveDexCollectionUseCase @Inject constructor(
+class GetDexCollectionUseCase @Inject constructor(
     private val dexRepository: DexRepository,
 ) {
     operator fun invoke(query: String, favoritesOnly: Boolean): Flow<DexCollection> =

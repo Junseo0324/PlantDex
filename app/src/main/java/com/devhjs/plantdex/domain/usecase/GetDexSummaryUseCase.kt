@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.time.Clock
 
-class ObserveDexSummaryUseCase @Inject constructor(
+class GetDexSummaryUseCase @Inject constructor(
     private val dexRepository: DexRepository,
     private val clock: Clock,
 ) {

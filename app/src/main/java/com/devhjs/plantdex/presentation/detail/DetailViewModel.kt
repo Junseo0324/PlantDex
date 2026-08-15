@@ -2,7 +2,7 @@ package com.devhjs.plantdex.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devhjs.plantdex.domain.usecase.ObserveDexEntryUseCase
+import com.devhjs.plantdex.domain.usecase.GetDexEntryUseCase
 import com.devhjs.plantdex.domain.usecase.SaveMemoUseCase
 import com.devhjs.plantdex.domain.usecase.SetFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val observeDexEntry: ObserveDexEntryUseCase,
+    private val getDexEntry: GetDexEntryUseCase,
     private val setFavorite: SetFavoriteUseCase,
     private val saveMemo: SaveMemoUseCase,
 ) : ViewModel() {
@@ -32,7 +32,7 @@ class DetailViewModel @Inject constructor(
 
         observeJob?.cancel()
         observeJob = viewModelScope.launch {
-            observeDexEntry(entryId).collect { entry ->
+            getDexEntry(entryId).collect { entry ->
                 _state.update { it.copy(entry = entry) }
             }
         }

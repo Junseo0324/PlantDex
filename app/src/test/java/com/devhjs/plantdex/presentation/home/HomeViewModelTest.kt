@@ -4,7 +4,7 @@ import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.DexSummary
 import com.devhjs.plantdex.domain.model.Plant
 import com.devhjs.plantdex.domain.model.Sunlight
-import com.devhjs.plantdex.domain.usecase.ObserveDexSummaryUseCase
+import com.devhjs.plantdex.domain.usecase.GetDexSummaryUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
@@ -24,11 +24,11 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val summaries = MutableStateFlow(DexSummary())
-    private val observeDexSummary = mockk<ObserveDexSummaryUseCase> {
+    private val getDexSummary = mockk<GetDexSummaryUseCase> {
         every { this@mockk.invoke(any()) } returns summaries
     }
 
-    private fun subject() = HomeViewModel(observeDexSummary)
+    private fun subject() = HomeViewModel(getDexSummary)
 
     private fun entry(number: Int) = DexEntry(
         id = number.toLong(),
@@ -81,6 +81,6 @@ class HomeViewModelTest {
         subject()
         advanceUntilIdle()
 
-        verify(exactly = 1) { observeDexSummary(RECENT_LIMIT) }
+        verify(exactly = 1) { getDexSummary(RECENT_LIMIT) }
     }
 }

@@ -15,7 +15,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import kotlin.time.Instant
 
-class ObserveDexEntryUseCaseTest {
+class GetDexEntryUseCaseTest {
 
     private val entry = DexEntry(
         id = 4L,
@@ -37,7 +37,7 @@ class ObserveDexEntryUseCaseTest {
         every { observe(any()) } returns observed
     }
 
-    private val subject = ObserveDexEntryUseCase(repository)
+    private val subject = GetDexEntryUseCase(repository)
 
     @Test
     fun `저장소가 흘린 항목을 그대로 전달한다`() = runTest {

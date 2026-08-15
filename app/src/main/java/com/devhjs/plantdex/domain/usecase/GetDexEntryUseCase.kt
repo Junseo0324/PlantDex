@@ -5,7 +5,7 @@ import com.devhjs.plantdex.domain.repository.DexRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class ObserveDexEntryUseCase @Inject constructor(
+class GetDexEntryUseCase @Inject constructor(
     private val dexRepository: DexRepository,
 ) {
     operator fun invoke(id: Long): Flow<DexEntry?> = dexRepository.observe(id)

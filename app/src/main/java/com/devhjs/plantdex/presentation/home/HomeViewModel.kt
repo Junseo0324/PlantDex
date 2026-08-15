@@ -2,7 +2,7 @@ package com.devhjs.plantdex.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devhjs.plantdex.domain.usecase.ObserveDexSummaryUseCase
+import com.devhjs.plantdex.domain.usecase.GetDexSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val observeDexSummary: ObserveDexSummaryUseCase,
+    private val getDexSummary: GetDexSummaryUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -24,7 +24,7 @@ class HomeViewModel @Inject constructor(
 
     private fun fetchDexSummary() {
         viewModelScope.launch {
-            observeDexSummary(recentLimit = RECENT_LIMIT).collect { summary ->
+            getDexSummary(recentLimit = RECENT_LIMIT).collect { summary ->
                 _state.update {
                     it.copy(
                         discoveredCount = summary.total,

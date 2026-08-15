@@ -17,7 +17,7 @@ import org.junit.Test
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
-class ObserveDexCollectionUseCaseTest {
+class GetDexCollectionUseCaseTest {
 
     private val now = Instant.fromEpochMilliseconds(1_785_000_000_000)
 
@@ -28,7 +28,7 @@ class ObserveDexCollectionUseCaseTest {
         }
     }
 
-    private val subject = ObserveDexCollectionUseCase(repository)
+    private val subject = GetDexCollectionUseCase(repository)
 
     private fun entry(
         number: Int,

@@ -16,7 +16,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
-class ObserveDexSummaryUseCaseTest {
+class GetDexSummaryUseCaseTest {
 
     private val now = Instant.fromEpochMilliseconds(1_785_000_000_000)
     private val clock = mockk<Clock> { every { now() } returns now }
@@ -28,7 +28,7 @@ class ObserveDexSummaryUseCaseTest {
         }
     }
 
-    private val subject = ObserveDexSummaryUseCase(repository, clock)
+    private val subject = GetDexSummaryUseCase(repository, clock)
 
     private fun plant(discoveredAt: Instant) = Plant(
         name = "몬스테라",

@@ -3,7 +3,7 @@ package com.devhjs.plantdex.presentation.detail
 import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.Plant
 import com.devhjs.plantdex.domain.model.Sunlight
-import com.devhjs.plantdex.domain.usecase.ObserveDexEntryUseCase
+import com.devhjs.plantdex.domain.usecase.GetDexEntryUseCase
 import com.devhjs.plantdex.domain.usecase.SaveMemoUseCase
 import com.devhjs.plantdex.domain.usecase.SetFavoriteUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
@@ -53,7 +53,7 @@ class DetailViewModelTest {
     )
 
     private val observed = MutableStateFlow<DexEntry?>(null)
-    private val observeDexEntry = mockk<ObserveDexEntryUseCase> {
+    private val getDexEntry = mockk<GetDexEntryUseCase> {
         every { this@mockk(any()) } returns observed
     }
     private val setFavorite = mockk<SetFavoriteUseCase> {
@@ -63,7 +63,7 @@ class DetailViewModelTest {
         coEvery { this@mockk(any(), any()) } returns Unit
     }
 
-    private fun subject() = DetailViewModel(observeDexEntry, setFavorite, saveMemo)
+    private fun subject() = DetailViewModel(getDexEntry, setFavorite, saveMemo)
 
     private fun loadedSubject() = subject().apply { load(ENTRY_ID) }
 
@@ -77,7 +77,7 @@ class DetailViewModelTest {
         subject()
         advanceUntilIdle()
 
-        verify(exactly = 0) { observeDexEntry(any()) }
+        verify(exactly = 0) { getDexEntry(any()) }
     }
 
     @Test
@@ -85,7 +85,7 @@ class DetailViewModelTest {
         loadedSubject()
         advanceUntilIdle()
 
-        verify(exactly = 1) { observeDexEntry(ENTRY_ID) }
+        verify(exactly = 1) { getDexEntry(ENTRY_ID) }
     }
 
     @Test
@@ -96,7 +96,7 @@ class DetailViewModelTest {
         repeat(3) { viewModel.load(ENTRY_ID) }
         advanceUntilIdle()
 
-        verify(exactly = 1) { observeDexEntry(ENTRY_ID) }
+        verify(exactly = 1) { getDexEntry(ENTRY_ID) }
     }
 
     @Test
@@ -107,8 +107,8 @@ class DetailViewModelTest {
         viewModel.load(99L)
         advanceUntilIdle()
 
-        verify(exactly = 1) { observeDexEntry(ENTRY_ID) }
-        verify(exactly = 1) { observeDexEntry(99L) }
+        verify(exactly = 1) { getDexEntry(ENTRY_ID) }
+        verify(exactly = 1) { getDexEntry(99L) }
     }
 
     @Test
