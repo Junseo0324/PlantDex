@@ -65,6 +65,16 @@
     <string name="home_see_all">전체보기</string>
     <string name="home_recent_empty">아직 발견한 식물이 없어요</string>
 
+    <!-- 도감 -->
+    <string name="collection_title">나의 식물도감</string>
+    <string name="collection_subtitle">발견한 식물 %1$d종 · 최근 발견 %2$s</string>
+    <string name="collection_subtitle_no_date">발견한 식물 %1$d종</string>
+    <string name="collection_search_placeholder">식물 이름으로 검색</string>
+    <string name="collection_filter_all">전체</string>
+    <string name="collection_filter_favorites">즐겨찾기</string>
+    <string name="collection_empty">아직 발견한 식물이 없어요</string>
+    <string name="collection_no_result">검색 결과가 없어요</string>
+
     <!-- 바텀 네비 -->
     <string name="nav_home">홈</string>
     <string name="nav_collection">도감</string>
