@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.devhjs.plantdex.presentation.analyze.AnalyzeScreenRoot
+import com.devhjs.plantdex.presentation.collection.CollectionScreenRoot
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.detail.DetailScreenRoot
 import com.devhjs.plantdex.presentation.home.HomeScreenRoot
@@ -48,11 +49,8 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                 }
                 entry<Route.Collection> {
                     TabScaffold(Route.Collection, backStack::switchTab) {
-                        PlaceholderScreen(
-                            title = "나의 도감",
-                            actions = listOf(
-                                "상세 열기" to { backStack.add(Route.Detail(entryId = 1L)) },
-                            ),
+                        CollectionScreenRoot(
+                            onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
                         )
                     }
                 }
