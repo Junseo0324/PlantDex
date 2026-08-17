@@ -65,6 +65,13 @@
     <string name="home_see_all">전체보기</string>
     <string name="home_recent_empty">아직 발견한 식물이 없어요</string>
 
+    <!-- 카메라 -->
+    <string name="camera_close">닫기</string>
+    <string name="camera_flash_auto">플래시 자동</string>
+    <string name="camera_guide">식물을 화면 중앙에 맞춰주세요</string>
+    <string name="camera_preview_caption">camera preview · tap to focus</string>
+    <string name="camera_shutter">촬영</string>
+
     <!-- 도감 -->
     <string name="collection_title">나의 식물도감</string>
     <string name="collection_subtitle">발견한 식물 %1$d종 · 최근 발견 %2$s</string>
