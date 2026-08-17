@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -45,6 +46,8 @@ fun BottomNavBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // 배경·구분선은 화면 끝까지 가고 탭만 제스처 바 위로 올린다.
+                .navigationBarsPadding()
                 .padding(horizontal = AppSpacing.screenH, vertical = 12.dp),
         ) {
             NavItem.entries.forEach { item ->

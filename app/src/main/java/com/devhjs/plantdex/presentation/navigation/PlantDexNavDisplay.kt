@@ -1,10 +1,10 @@
 package com.devhjs.plantdex.presentation.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -23,71 +23,69 @@ import com.devhjs.plantdex.presentation.home.HomeScreenRoot
 fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
     val backStack = rememberNavBackStack(Route.Home)
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = AppColors.Cream,
-    ) { innerPadding ->
-        NavDisplay(
-            backStack = backStack,
-            modifier = Modifier.padding(innerPadding),
-            onBack = { backStack.popOrIgnore() },
-            // SceneSetup 데코레이터는 NavDisplay 가 내부에서 붙인다.
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                // 이게 있어야 각 entry 안에서 hiltViewModel() 이 entry 수명에 묶인다.
-                rememberViewModelStoreNavEntryDecorator(),
-            ),
-            entryProvider = entryProvider {
-                entry<Route.Home> {
-                    TabScaffold(Route.Home, backStack::switchTab) {
-                        HomeScreenRoot(
-                            onDiscover = { backStack.add(Route.Camera) },
-                            onSeeAllCollection = { backStack.switchTab(Route.Collection) },
-                            onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
-                        )
-                    }
+    // 인셋은 화면이 각자 처리한다. 카메라가 상태바 뒤까지 배경을 깔아야 하기 때문.
+    NavDisplay(
+        backStack = backStack,
+        modifier = modifier
+            .fillMaxSize()
+            .background(AppColors.Cream),
+        onBack = { backStack.popOrIgnore() },
+        // SceneSetup 데코레이터는 NavDisplay 가 내부에서 붙인다.
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            // 이게 있어야 각 entry 안에서 hiltViewModel() 이 entry 수명에 묶인다.
+            rememberViewModelStoreNavEntryDecorator(),
+        ),
+        entryProvider = entryProvider {
+            entry<Route.Home> {
+                TabScaffold(Route.Home, backStack::switchTab) {
+                    HomeScreenRoot(
+                        onDiscover = { backStack.add(Route.Camera) },
+                        onSeeAllCollection = { backStack.switchTab(Route.Collection) },
+                        onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
+                    )
                 }
-                entry<Route.Collection> {
-                    TabScaffold(Route.Collection, backStack::switchTab) {
-                        CollectionScreenRoot(
-                            onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
-                        )
-                    }
+            }
+            entry<Route.Collection> {
+                TabScaffold(Route.Collection, backStack::switchTab) {
+                    CollectionScreenRoot(
+                        onOpenDetail = { backStack.add(Route.Detail(entryId = it)) },
+                    )
                 }
-                entry<Route.Map> {
-                    TabScaffold(Route.Map, backStack::switchTab) { PlaceholderScreen(title = "지도") }
+            }
+            entry<Route.Map> {
+                TabScaffold(Route.Map, backStack::switchTab) { PlaceholderScreen(title = "지도") }
+            }
+            entry<Route.Profile> {
+                TabScaffold(Route.Profile, backStack::switchTab) {
+                    PlaceholderScreen(title = "내정보")
                 }
-                entry<Route.Profile> {
-                    TabScaffold(Route.Profile, backStack::switchTab) {
-                        PlaceholderScreen(title = "내정보")
-                    }
-                }
+            }
 
-                entry<Route.Camera> {
-                    PlaceholderScreen(
-                        title = "촬영",
-                        actions = listOf("촬영하기" to { backStack.add(Route.Analyze) }),
-                    )
-                }
-                entry<Route.Analyze> { AnalyzeScreenRoot() }
-                entry<Route.Reveal> { key ->
-                    PlaceholderScreen(
-                        title = "발견 연출",
-                        subtitle = "entryId=${key.entryId}",
-                        actions = listOf(
-                            "도감에 등록하기" to { backStack.finishDiscovery(key.entryId) },
-                        ),
-                    )
-                }
-                entry<Route.Detail> { key ->
-                    DetailScreenRoot(
-                        entryId = key.entryId,
-                        onBack = { backStack.popOrIgnore() },
-                    )
-                }
-            },
-        )
-    }
+            entry<Route.Camera> {
+                PlaceholderScreen(
+                    title = "촬영",
+                    actions = listOf("촬영하기" to { backStack.add(Route.Analyze) }),
+                )
+            }
+            entry<Route.Analyze> { AnalyzeScreenRoot() }
+            entry<Route.Reveal> { key ->
+                PlaceholderScreen(
+                    title = "발견 연출",
+                    subtitle = "entryId=${key.entryId}",
+                    actions = listOf(
+                        "도감에 등록하기" to { backStack.finishDiscovery(key.entryId) },
+                    ),
+                )
+            }
+            entry<Route.Detail> { key ->
+                DetailScreenRoot(
+                    entryId = key.entryId,
+                    onBack = { backStack.popOrIgnore() },
+                )
+            }
+        },
+    )
 }
 
 /** 탭 화면 공통 뼈대. 본문 아래에 바텀 네비를 깐다. */
@@ -98,7 +96,12 @@ private fun TabScaffold(
     content: @Composable () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f)) { content() }
+        // 하단 인셋은 BottomNavBar 가 자기 배경을 깔면서 처리한다.
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .statusBarsPadding(),
+        ) { content() }
         BottomNavBar(selected = selected, onSelect = onSelectTab)
     }
 }
