@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.devhjs.plantdex.presentation.analyze.AnalyzeScreenRoot
+import com.devhjs.plantdex.presentation.camera.CameraScreenRoot
 import com.devhjs.plantdex.presentation.collection.CollectionScreenRoot
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.detail.DetailScreenRoot
@@ -63,9 +64,9 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
             }
 
             entry<Route.Camera> {
-                PlaceholderScreen(
-                    title = "촬영",
-                    actions = listOf("촬영하기" to { backStack.add(Route.Analyze) }),
+                CameraScreenRoot(
+                    onShutter = { backStack.add(Route.Analyze) },
+                    onClose = { backStack.popOrIgnore() },
                 )
             }
             entry<Route.Analyze> { AnalyzeScreenRoot() }
