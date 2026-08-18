@@ -1,21 +1,22 @@
 <resources>
     <string name="app_name">PlantDex</string>
 
-    <!-- 분석 화면: 대기 -->
-    <string name="analyze_eyebrow">PLANT DEX</string>
-    <string name="analyze_title">식물을 도감에 담아볼까요</string>
-    <string name="analyze_hint">사진을 분석해 이름과 키우는 방법을 알려드려요.</string>
-    <string name="analyze_photo_placeholder">사진 자리 (임시)</string>
-    <string name="analyze_cta">분석하기</string>
-
     <!-- 분석 화면: 진행 중 -->
-    <string name="analyze_loading_title">분석 중이에요</string>
-    <string name="analyze_loading_body">사진 속 식물을 살펴보고 있어요.</string>
+    <string name="analyze_progress_title">AI가 식물을 분석하고 있어요</string>
+    <string name="analyze_progress_body">잎의 형태와 색을 확인하는 중</string>
+    <string name="analyze_shot_caption">captured shot</string>
+    <string name="analyze_step_upload">이미지 업로드</string>
+    <string name="analyze_step_infer">Vision 모델 추론</string>
+    <string name="analyze_step_register">도감 등록</string>
+    <string name="analyze_status_done">완료</string>
+    <string name="analyze_status_running">진행 중</string>
+    <string name="analyze_status_waiting">대기</string>
+    <!-- 아직 도착하지 않은 결과를 보여주는 연출용 고정 문자열이다. -->
+    <string name="analyze_json_sample">{ \"name\": \"튤립\", \"scientificName\": \"Tulipa gesneriana\", \"difficulty\": \"쉬움\" }</string>
 
-    <!-- 분석 화면: 결과 -->
+    <!-- 분석 화면: 결과 (Pass 6 에서 발견 연출로 교체 예정) -->
     <string name="analyze_section_basic_info">기본 정보</string>
     <string name="analyze_discovered_at">%1$s 발견</string>
-    <string name="analyze_reset">다시 분석하기</string>
     <string name="analyze_retry">다시 시도</string>
 
     <!-- 스펙 -->
