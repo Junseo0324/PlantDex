@@ -14,10 +14,13 @@
     <!-- 아직 도착하지 않은 결과를 보여주는 연출용 고정 문자열이다. -->
     <string name="analyze_json_sample">{ \"name\": \"튤립\", \"scientificName\": \"Tulipa gesneriana\", \"difficulty\": \"쉬움\" }</string>
 
-    <!-- 분석 화면: 결과 (Pass 6 에서 발견 연출로 교체 예정) -->
-    <string name="analyze_section_basic_info">기본 정보</string>
-    <string name="analyze_discovered_at">%1$s 발견</string>
     <string name="analyze_retry">다시 시도</string>
+
+    <!-- 발견 연출 -->
+    <string name="reveal_eyebrow">NEW DISCOVERY</string>
+    <string name="reveal_body">새로운 식물을 발견했습니다</string>
+    <string name="reveal_register">도감에 등록하기</string>
+    <string name="reveal_retake">다시 촬영</string>
 
     <!-- 스펙 -->
     <string name="spec_watering">물 주기</string>
