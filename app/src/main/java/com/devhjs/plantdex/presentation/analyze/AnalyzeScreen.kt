@@ -183,7 +183,10 @@ private fun AnalyzeScreenLoadingPreview() {
 @Composable
 private fun AnalyzeScreenSuccessPreview() {
     PlantDexTheme {
-        AnalyzeScreen(state = AnalyzeState.Success(PreviewPlant), onAction = {})
+        AnalyzeScreen(
+            state = AnalyzeState.Success(PreviewPlant, nextDexNumber = 5),
+            onAction = {},
+        )
     }
 }
 
