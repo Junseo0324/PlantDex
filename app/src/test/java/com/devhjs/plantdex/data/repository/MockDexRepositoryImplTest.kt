@@ -49,6 +49,36 @@ class MockDexRepositoryImplTest {
     }
 
     @Test
+    fun `nextDexNumber 는 현재 최대 번호 다음이다`() = runTest {
+        assertEquals(MockPlants.All.size + 1, subject.nextDexNumber())
+    }
+
+    @Test
+    fun `nextDexNumber 는 등록해도 되돌아가지 않는다`() = runTest {
+        val before = subject.nextDexNumber()
+
+        subject.register(newPlant)
+
+        assertEquals(before + 1, subject.nextDexNumber())
+    }
+
+    @Test
+    fun `nextDexNumber 를 읽어도 등록되지 않는다`() = runTest {
+        val before = all().size
+
+        subject.nextDexNumber()
+
+        assertEquals(before, all().size)
+    }
+
+    @Test
+    fun `register 는 nextDexNumber 가 알려준 번호를 그대로 쓴다`() = runTest {
+        val expected = subject.nextDexNumber()
+
+        assertEquals(expected, subject.register(newPlant).dexNumber)
+    }
+
+    @Test
     fun `register 는 다음 도감 번호를 부여한다`() = runTest {
         val before = all().maxOf(DexEntry::dexNumber)
 
