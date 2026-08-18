@@ -69,14 +69,10 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                     onClose = { backStack.popOrIgnore() },
                 )
             }
-            entry<Route.Analyze> { AnalyzeScreenRoot() }
-            entry<Route.Reveal> { key ->
-                PlaceholderScreen(
-                    title = "발견 연출",
-                    subtitle = "entryId=${key.entryId}",
-                    actions = listOf(
-                        "도감에 등록하기" to { backStack.finishDiscovery(key.entryId) },
-                    ),
+            entry<Route.Analyze> {
+                AnalyzeScreenRoot(
+                    onRegistered = { backStack.finishDiscovery(it) },
+                    onRetake = { backStack.popOrIgnore() },
                 )
             }
             entry<Route.Detail> { key ->
@@ -117,8 +113,8 @@ private fun MutableList<NavKey>.switchTab(tab: Route.Tab) {
     add(tab)
 }
 
-/** 발견 플로우(촬영 → 분석 → 연출)를 통째로 걷어내고 상세로 갈아끼운다. */
+/** 발견 플로우(촬영 → 분석·연출)를 통째로 걷어내고 상세로 갈아끼운다. */
 private fun MutableList<NavKey>.finishDiscovery(entryId: Long) {
-    removeAll { it is Route.Camera || it is Route.Analyze || it is Route.Reveal }
+    removeAll { it is Route.Camera || it is Route.Analyze }
     add(Route.Detail(entryId))
 }

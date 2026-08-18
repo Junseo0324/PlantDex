@@ -17,14 +17,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.devhjs.plantdex.R
+import com.devhjs.plantdex.core.util.toDexLabel
 import com.devhjs.plantdex.domain.model.AnalysisError
 import com.devhjs.plantdex.domain.model.Plant
 import com.devhjs.plantdex.domain.model.Sunlight
 import com.devhjs.plantdex.presentation.component.AppButton
+import com.devhjs.plantdex.presentation.component.AppOutlinedButton
 import com.devhjs.plantdex.presentation.component.CodeBlock
 import com.devhjs.plantdex.presentation.component.IndeterminateBar
 import com.devhjs.plantdex.presentation.component.PhotoPlaceholder
+import com.devhjs.plantdex.presentation.component.RevealPhoto
 import com.devhjs.plantdex.presentation.component.StepRow
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.designsystem.AppSpacing
@@ -40,10 +44,16 @@ fun AnalyzeScreen(
     onAction: (AnalyzeAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // 발견 연출만 액센트 풀스크린이라 배경을 상태에 따라 고른다.
+    val background = when (state) {
+        is AnalyzeState.Success -> AppColors.Terracotta
+        else -> AppColors.Cream
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppColors.Cream)
+            .background(background)
             .safeDrawingPadding(),
     ) {
         when (state) {
@@ -113,18 +123,65 @@ fun AnalyzeScreen(
                 )
             }
 
-            // TODO: Pass 6 에서 발견 연출 화면으로 교체한다.
             is AnalyzeState.Success -> {
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(horizontal = AppSpacing.screenH),
+                        .padding(horizontal = 36.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(26.dp, Alignment.CenterVertically),
                 ) {
-                    Text(text = state.plant.name, style = AppTextStyles.TitleXL)
-                    Text(text = state.plant.englishName, style = AppTextStyles.Scientific)
+                    Text(
+                        text = stringResource(R.string.reveal_eyebrow),
+                        style = AppTextStyles.Eyebrow,
+                    )
+
+                    RevealPhoto(photoUri = null, contentDescription = state.plant.name)
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            text = state.nextDexNumber.toDexLabel(),
+                            style = AppTextStyles.DexNumberL,
+                        )
+                        Text(
+                            text = state.plant.name,
+                            style = AppTextStyles.Display,
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            text = stringResource(R.string.reveal_body),
+                            style = AppTextStyles.BodyStrong.copy(
+                                fontSize = 15.sp,
+                                color = AppColors.TerracottaOnSoft,
+                            ),
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.padding(
+                        start = AppSpacing.screenH,
+                        end = AppSpacing.screenH,
+                        bottom = 44.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.gutter),
+                ) {
+                    AppButton(
+                        text = stringResource(R.string.reveal_register),
+                        onClick = { onAction(AnalyzeAction.Register) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    AppOutlinedButton(
+                        text = stringResource(R.string.reveal_retake),
+                        onClick = { onAction(AnalyzeAction.Retake) },
+                        modifier = Modifier.fillMaxWidth(),
+                        borderColor = AppColors.OnAccent.copy(alpha = 0.6f),
+                        contentColor = AppColors.OnAccent,
+                    )
                 }
             }
 
