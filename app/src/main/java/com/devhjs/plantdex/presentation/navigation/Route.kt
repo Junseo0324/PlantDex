@@ -30,8 +30,5 @@ sealed interface Route : NavKey {
     data object Analyze : Route
 
     @Serializable
-    data class Reveal(val entryId: Long) : Route
-
-    @Serializable
     data class Detail(val entryId: Long) : Route
 }
