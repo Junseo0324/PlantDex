@@ -3,8 +3,10 @@ package com.devhjs.plantdex.presentation.analyze
 import com.devhjs.plantdex.domain.model.AnalysisError
 import com.devhjs.plantdex.domain.model.Plant
 
+/**
+ * 촬영을 마치고 들어오는 화면이라 시작부터 [Loading] 이다. 대기 상태가 없다.
+ */
 sealed interface AnalyzeState {
-    data object Idle : AnalyzeState
     data object Loading : AnalyzeState
     data class Success(val plant: Plant) : AnalyzeState
 

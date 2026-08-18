@@ -18,15 +18,18 @@ class AnalyzeViewModel @Inject constructor(
     private val analyzePlantPhoto: AnalyzePlantPhotoUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<AnalyzeState>(AnalyzeState.Idle)
+    private val _state = MutableStateFlow<AnalyzeState>(AnalyzeState.Loading)
     val state: StateFlow<AnalyzeState> = _state.asStateFlow()
 
     private var analyzeJob: Job? = null
 
+    init {
+        analyze()
+    }
+
     fun onAction(action: AnalyzeAction) {
         when (action) {
             AnalyzeAction.Analyze -> analyze()
-            AnalyzeAction.Reset -> reset()
         }
     }
 
@@ -40,11 +43,6 @@ class AnalyzeViewModel @Inject constructor(
                 is Result.Error -> AnalyzeState.Error(result.error)
             }
         }
-    }
-
-    private fun reset() {
-        analyzeJob?.cancel()
-        _state.value = AnalyzeState.Idle
     }
 
     /** TODO: CameraX 촬영 화면이 붙으면 화면이 PlantPhoto 를 넘겨주고 이 함수는 삭제한다. */

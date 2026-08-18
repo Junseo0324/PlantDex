@@ -29,18 +29,17 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
+/**
+ * 촬영을 마치고 들어오는 화면이라 ViewModel 이 init 에서 분석을 시작한다.
+ *
+ * 그래서 subject 를 필드로 만들면 안 된다 — 필드 초기화는 MainDispatcherRule 이
+ * Dispatchers.setMain 을 걸기 전에 실행돼서 init 의 코루틴이 실제 Main 으로 새어나간다.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
-
-    private val analyzer = mockk<PlantAnalyzer>()
-    private val clock = mockk<Clock> {
-        every { now() } returns Instant.fromEpochMilliseconds(1_700_000_000_000)
-    }
-
-    private val subject = AnalyzeViewModel(AnalyzePlantPhotoUseCase(analyzer, clock))
 
     private val analysis = PlantAnalysis(
         name = "몬스테라",
@@ -52,116 +51,130 @@ class AnalyzeViewModelTest {
         rawDifficulty = 2,
     )
 
-    private fun givenSuccess() {
-        coEvery { analyzer.analyze(any()) } returns Result.Success(analysis)
+    private val analyzer = mockk<PlantAnalyzer> {
+        coEvery { analyze(any()) } returns Result.Success(analysis)
     }
+    private val clock = mockk<Clock> {
+        every { now() } returns Instant.fromEpochMilliseconds(1_700_000_000_000)
+    }
+
+    private fun subject() = AnalyzeViewModel(AnalyzePlantPhotoUseCase(analyzer, clock))
 
     private fun givenError(error: AnalysisError) {
         coEvery { analyzer.analyze(any()) } returns Result.Error(error)
     }
 
-    private fun TestScope.collectStates(): List<AnalyzeState> {
+    private fun TestScope.collectStates(viewModel: AnalyzeViewModel): List<AnalyzeState> {
         val states = mutableListOf<AnalyzeState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            subject.state.toList(states)
+            viewModel.state.toList(states)
         }
         return states
     }
 
     @Test
-    fun `초기 상태는 Idle 이다`() = runTest {
-        assertEquals(AnalyzeState.Idle, subject.state.value)
+    fun `초기 상태는 Loading 이다`() = runTest {
+        assertEquals(AnalyzeState.Loading, subject().state.value)
     }
 
     @Test
-    fun `성공하면 Idle Loading Success 순서로 바뀐다`() = runTest {
-        givenSuccess()
-        val states = collectStates()
+    fun `생성되면 따로 요청하지 않아도 분석이 시작된다`() = runTest {
+        val viewModel = subject()
 
-        subject.onAction(AnalyzeAction.Analyze)
         advanceUntilIdle()
 
-        assertEquals(3, states.size)
-        assertEquals(AnalyzeState.Idle, states[0])
-        assertEquals(AnalyzeState.Loading, states[1])
-        assertTrue(states[2] is AnalyzeState.Success)
-        assertEquals("몬스테라", (states[2] as AnalyzeState.Success).plant.name)
+        coVerify(exactly = 1) { analyzer.analyze(any()) }
+        assertTrue(viewModel.state.value is AnalyzeState.Success)
     }
 
     @Test
-    fun `실패하면 Idle Loading Error 순서로 바뀌고 에러 종류가 유지된다`() = runTest {
+    fun `성공하면 Loading 다음 Success 로 바뀐다`() = runTest {
+        val viewModel = subject()
+        val states = collectStates(viewModel)
+
+        advanceUntilIdle()
+
+        assertEquals(2, states.size)
+        assertEquals(AnalyzeState.Loading, states[0])
+        assertEquals("몬스테라", (states[1] as AnalyzeState.Success).plant.name)
+    }
+
+    @Test
+    fun `실패하면 Loading 다음 Error 로 바뀌고 에러 종류가 유지된다`() = runTest {
         givenError(AnalysisError.NotAPlant)
-        val states = collectStates()
+        val viewModel = subject()
+        val states = collectStates(viewModel)
 
-        subject.onAction(AnalyzeAction.Analyze)
         advanceUntilIdle()
 
-        assertEquals(3, states.size)
-        assertEquals(AnalyzeState.Loading, states[1])
-        assertEquals(AnalyzeState.Error(AnalysisError.NotAPlant), states[2])
+        assertEquals(2, states.size)
+        assertEquals(AnalyzeState.Loading, states[0])
+        assertEquals(AnalyzeState.Error(AnalysisError.NotAPlant), states[1])
     }
 
     @Test
     fun `발견일이 결과에 반영된다`() = runTest {
         val now = Instant.fromEpochMilliseconds(1_234_567_890)
         every { clock.now() } returns now
-        givenSuccess()
+        val viewModel = subject()
 
-        subject.onAction(AnalyzeAction.Analyze)
         advanceUntilIdle()
 
-        assertEquals(now, (subject.state.value as AnalyzeState.Success).plant.discoveredAt)
+        assertEquals(now, (viewModel.state.value as AnalyzeState.Success).plant.discoveredAt)
     }
 
     @Test
-    fun `분석 중 연타하면 한 번만 실행된다`() = runTest {
+    fun `분석 중에 재시도를 보내도 한 번만 실행된다`() = runTest {
         coEvery { analyzer.analyze(any()) } coAnswers {
             delay(500.milliseconds)
             Result.Success(analysis)
         }
+        val viewModel = subject()
 
-        subject.onAction(AnalyzeAction.Analyze)
-        subject.onAction(AnalyzeAction.Analyze)
-        subject.onAction(AnalyzeAction.Analyze)
+        repeat(3) { viewModel.onAction(AnalyzeAction.Analyze) }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { analyzer.analyze(any()) }
-        assertTrue(subject.state.value is AnalyzeState.Success)
+        assertTrue(viewModel.state.value is AnalyzeState.Success)
     }
 
     @Test
-    fun `Success 에서 Reset 액션을 주면 Idle 로 돌아간다`() = runTest {
-        givenSuccess()
-
-        subject.onAction(AnalyzeAction.Analyze)
-        advanceUntilIdle()
-        assertTrue(subject.state.value is AnalyzeState.Success)
-
-        subject.onAction(AnalyzeAction.Reset)
-
-        assertEquals(AnalyzeState.Idle, subject.state.value)
-    }
-
-    @Test
-    fun `결과가 나온 뒤에도 다시 분석할 수 있다`() = runTest {
-        givenSuccess()
-        subject.onAction(AnalyzeAction.Analyze)
-        advanceUntilIdle()
-
+    fun `실패한 뒤 재시도하면 다시 분석한다`() = runTest {
         givenError(AnalysisError.Network)
-        subject.onAction(AnalyzeAction.Analyze)
+        val viewModel = subject()
+        advanceUntilIdle()
+        assertEquals(AnalyzeState.Error(AnalysisError.Network), viewModel.state.value)
+
+        coEvery { analyzer.analyze(any()) } returns Result.Success(analysis)
+        viewModel.onAction(AnalyzeAction.Analyze)
         advanceUntilIdle()
 
         coVerify(exactly = 2) { analyzer.analyze(any()) }
-        assertEquals(AnalyzeState.Error(AnalysisError.Network), subject.state.value)
+        assertTrue(viewModel.state.value is AnalyzeState.Success)
+    }
+
+    @Test
+    fun `재시도하면 Loading 을 다시 거친다`() = runTest {
+        givenError(AnalysisError.Network)
+        val viewModel = subject()
+        val states = collectStates(viewModel)
+        advanceUntilIdle()
+
+        coEvery { analyzer.analyze(any()) } returns Result.Success(analysis)
+        viewModel.onAction(AnalyzeAction.Analyze)
+        advanceUntilIdle()
+
+        // Loading -> Error -> Loading -> Success
+        assertEquals(4, states.size)
+        assertEquals(AnalyzeState.Loading, states[2])
+        assertTrue(states[3] is AnalyzeState.Success)
     }
 
     @Test
     fun `분석기에 비어있지 않은 사진이 전달된다`() = runTest {
-        givenSuccess()
         val captured = slot<PlantPhoto>()
+        subject()
 
-        subject.onAction(AnalyzeAction.Analyze)
         advanceUntilIdle()
 
         coVerify { analyzer.analyze(capture(captured)) }
