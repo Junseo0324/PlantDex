@@ -5,10 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.devhjs.plantdex.core.util.Result
 import com.devhjs.plantdex.domain.model.PlantPhoto
 import com.devhjs.plantdex.domain.usecase.AnalyzePlantPhotoUseCase
+import com.devhjs.plantdex.domain.usecase.GetNextDexNumberUseCase
+import com.devhjs.plantdex.domain.usecase.RegisterDexEntryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,12 +20,18 @@ import javax.inject.Inject
 @HiltViewModel
 class AnalyzeViewModel @Inject constructor(
     private val analyzePlantPhoto: AnalyzePlantPhotoUseCase,
+    private val getNextDexNumber: GetNextDexNumberUseCase,
+    private val registerDexEntry: RegisterDexEntryUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<AnalyzeState>(AnalyzeState.Loading)
     val state: StateFlow<AnalyzeState> = _state.asStateFlow()
 
+    private val _event = MutableSharedFlow<AnalyzeEvent>()
+    val event = _event.asSharedFlow()
+
     private var analyzeJob: Job? = null
+    private var registerJob: Job? = null
 
     init {
         analyze()
@@ -30,6 +40,8 @@ class AnalyzeViewModel @Inject constructor(
     fun onAction(action: AnalyzeAction) {
         when (action) {
             AnalyzeAction.Analyze -> analyze()
+            AnalyzeAction.Register -> register()
+            AnalyzeAction.Retake -> Unit // Root 가 처리한다
         }
     }
 
@@ -39,9 +51,20 @@ class AnalyzeViewModel @Inject constructor(
         analyzeJob = viewModelScope.launch {
             _state.value = AnalyzeState.Loading
             _state.value = when (val result = analyzePlantPhoto(dummyPhoto())) {
-                is Result.Success -> AnalyzeState.Success(result.data)
+                // 아직 등록 전이라 "등록하면 받게 될" 번호를 미리 읽어둔다.
+                is Result.Success -> AnalyzeState.Success(result.data, getNextDexNumber())
                 is Result.Error -> AnalyzeState.Error(result.error)
             }
+        }
+    }
+
+    private fun register() {
+        val success = _state.value as? AnalyzeState.Success ?: return
+        if (registerJob?.isActive == true) return
+
+        registerJob = viewModelScope.launch {
+            val entry = registerDexEntry(success.plant)
+            _event.emit(AnalyzeEvent.Registered(entry.id))
         }
     }
 
