@@ -2,11 +2,15 @@ package com.devhjs.plantdex.presentation.analyze
 
 import com.devhjs.plantdex.core.util.Result
 import com.devhjs.plantdex.domain.datasource.PlantAnalyzer
+import com.devhjs.plantdex.domain.mapper.toPlant
 import com.devhjs.plantdex.domain.model.AnalysisError
+import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.PlantAnalysis
 import com.devhjs.plantdex.domain.model.PlantPhoto
 import com.devhjs.plantdex.domain.model.Sunlight
 import com.devhjs.plantdex.domain.usecase.AnalyzePlantPhotoUseCase
+import com.devhjs.plantdex.domain.usecase.GetNextDexNumberUseCase
+import com.devhjs.plantdex.domain.usecase.RegisterDexEntryUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -58,7 +62,32 @@ class AnalyzeViewModelTest {
         every { now() } returns Instant.fromEpochMilliseconds(1_700_000_000_000)
     }
 
-    private fun subject() = AnalyzeViewModel(AnalyzePlantPhotoUseCase(analyzer, clock))
+    private val registeredEntry = DexEntry(
+        id = 5L,
+        dexNumber = 5,
+        plant = analysis.toPlant(Instant.fromEpochMilliseconds(1_700_000_000_000)),
+    )
+
+    private val getNextDexNumber = mockk<GetNextDexNumberUseCase> {
+        coEvery { this@mockk() } returns 5
+    }
+    private val registerDexEntry = mockk<RegisterDexEntryUseCase> {
+        coEvery { this@mockk(any(), any()) } returns registeredEntry
+    }
+
+    private fun subject() = AnalyzeViewModel(
+        AnalyzePlantPhotoUseCase(analyzer, clock),
+        getNextDexNumber,
+        registerDexEntry,
+    )
+
+    private fun TestScope.collectEvents(viewModel: AnalyzeViewModel): List<AnalyzeEvent> {
+        val events = mutableListOf<AnalyzeEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.event.toList(events)
+        }
+        return events
+    }
 
     private fun givenError(error: AnalysisError) {
         coEvery { analyzer.analyze(any()) } returns Result.Error(error)
@@ -179,5 +208,80 @@ class AnalyzeViewModelTest {
 
         coVerify { analyzer.analyze(capture(captured)) }
         assertTrue(captured.captured.bytes.isNotEmpty())
+    }
+
+    @Test
+    fun `성공 상태에 등록하면 받게 될 번호가 실린다`() = runTest {
+        coEvery { getNextDexNumber() } returns 7
+        val viewModel = subject()
+
+        advanceUntilIdle()
+
+        assertEquals(7, (viewModel.state.value as AnalyzeState.Success).nextDexNumber)
+    }
+
+    @Test
+    fun `Register 는 분석된 식물을 도감에 등록한다`() = runTest {
+        val viewModel = subject()
+        advanceUntilIdle()
+
+        viewModel.onAction(AnalyzeAction.Register)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { registerDexEntry(match { it.name == "몬스테라" }, null) }
+    }
+
+    @Test
+    fun `등록되면 Registered 이벤트가 나온다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
+        viewModel.onAction(AnalyzeAction.Register)
+        advanceUntilIdle()
+
+        assertEquals(listOf(AnalyzeEvent.Registered(5L)), events)
+    }
+
+    @Test
+    fun `성공하기 전에는 Register 가 아무것도 하지 않는다`() = runTest {
+        givenError(AnalysisError.Network)
+        val viewModel = subject()
+        advanceUntilIdle()
+
+        viewModel.onAction(AnalyzeAction.Register)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { registerDexEntry(any(), any()) }
+    }
+
+    @Test
+    fun `등록을 연타해도 한 번만 등록된다`() = runTest {
+        coEvery { registerDexEntry(any(), any()) } coAnswers {
+            delay(500.milliseconds)
+            registeredEntry
+        }
+        val viewModel = subject()
+        advanceUntilIdle()
+
+        repeat(3) { viewModel.onAction(AnalyzeAction.Register) }
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { registerDexEntry(any(), any()) }
+    }
+
+    @Test
+    fun `Retake 는 ViewModel 에서 아무것도 하지 않는다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+        val before = viewModel.state.value
+
+        viewModel.onAction(AnalyzeAction.Retake)
+        advanceUntilIdle()
+
+        assertEquals(before, viewModel.state.value)
+        assertEquals(emptyList<AnalyzeEvent>(), events)
+        coVerify(exactly = 0) { registerDexEntry(any(), any()) }
     }
 }
