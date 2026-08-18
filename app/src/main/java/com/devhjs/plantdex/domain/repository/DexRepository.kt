@@ -16,6 +16,9 @@ interface DexRepository {
     /** 해당 id 의 항목. 삭제됐거나 없으면 null 을 흘린다. */
     fun observe(id: Long): Flow<DexEntry?>
 
+    /** 다음에 등록될 도감 번호. 등록 전에 미리 보여줄 때 쓴다. */
+    suspend fun nextDexNumber(): Int
+
     /** 분석 결과를 도감에 등록하고 다음 도감 번호 부여 */
     suspend fun register(plant: Plant, photoUri: String? = null): DexEntry
 

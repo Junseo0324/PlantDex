@@ -36,18 +36,22 @@ class MockDexRepositoryImpl @Inject constructor(
     override fun observe(id: Long): Flow<DexEntry?> =
         entries.map { list -> list.firstOrNull { it.id == id } }
 
+    override suspend fun nextDexNumber(): Int = entries.value.nextDexNumber()
+
     override suspend fun register(plant: Plant, photoUri: String?): DexEntry = writeLock.withLock {
         val current = entries.value
-        val nextNumber = (current.maxOfOrNull(DexEntry::dexNumber) ?: 0) + 1
         val entry = DexEntry(
             id = (current.maxOfOrNull(DexEntry::id) ?: 0L) + 1L,
-            dexNumber = nextNumber,
+            dexNumber = current.nextDexNumber(),
             plant = plant,
             photoUri = photoUri,
         )
         entries.value = current + entry
         entry
     }
+
+    private fun List<DexEntry>.nextDexNumber(): Int =
+        (maxOfOrNull(DexEntry::dexNumber) ?: 0) + 1
 
     override suspend fun setFavorite(id: Long, favorite: Boolean) =
         edit(id) { it.copy(isFavorite = favorite) }
