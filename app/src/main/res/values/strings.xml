@@ -89,6 +89,25 @@
     <string name="collection_empty">아직 발견한 식물이 없어요</string>
     <string name="collection_no_result">검색 결과가 없어요</string>
 
+    <!-- 기록 -->
+    <string name="record_title">발견 기록</string>
+    <string name="record_subtitle">%1$d년 · 총 %2$d종 발견</string>
+    <string name="record_streak">연속 기록</string>
+    <string name="record_streak_unit">일</string>
+    <string name="record_longest">최장 기록</string>
+    <string name="record_longest_days">%1$d일</string>
+    <string name="record_monthly">월별 발견</string>
+    <string name="record_monthly_range">최근 6개월</string>
+    <string name="record_month_label">%1$d월</string>
+    <string name="record_by_category">분류별</string>
+    <string name="record_empty">아직 발견 기록이 없어요</string>
+
+    <!-- 분류 -->
+    <string name="category_wildflower">야생화</string>
+    <string name="category_foliage">관엽</string>
+    <string name="category_bulb">구근</string>
+    <string name="category_other">기타</string>
+
     <!-- 바텀 네비 -->
     <string name="nav_home">홈</string>
     <string name="nav_collection">도감</string>
