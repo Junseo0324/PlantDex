@@ -12,4 +12,5 @@ data class PlantAnalysis(
     val watering: String,
     val sunlight: Sunlight,
     val rawDifficulty: Int,
+    val category: PlantCategory = PlantCategory.OTHER,
 )

@@ -14,4 +14,5 @@ data class Plant(
     val sunlight: Sunlight,
     val difficulty: Int,
     val discoveredAt: Instant,
+    val category: PlantCategory = PlantCategory.OTHER,
 )

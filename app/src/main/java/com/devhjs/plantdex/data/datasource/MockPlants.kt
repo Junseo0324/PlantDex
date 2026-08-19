@@ -1,12 +1,15 @@
 package com.devhjs.plantdex.data.datasource
 
 import com.devhjs.plantdex.domain.model.PlantAnalysis
+import com.devhjs.plantdex.domain.model.PlantCategory
 import com.devhjs.plantdex.domain.model.Sunlight
 /** Mock 데이터 */
 object MockPlants {
 
 
-    val All: List<PlantAnalysis> get() = listOf(Monstera, Sansevieria, Stuckyi, Adiantum)
+    /** 최근 발견 순. 시드 나이(MockDexRepositoryImpl.SEED_AGES)와 순서를 맞춘다. */
+    val All: List<PlantAnalysis>
+        get() = listOf(Violet, Monstera, Dandelion, Sansevieria, Stuckyi, Adiantum, Tulip)
 
     val Monstera = PlantAnalysis(
         name = "몬스테라",
@@ -16,6 +19,7 @@ object MockPlants {
         watering = "겉흙이 마르면 2주에 한 번",
         sunlight = Sunlight.BRIGHT_INDIRECT,
         rawDifficulty = 2,
+        category = PlantCategory.FOLIAGE,
     )
 
     val Sansevieria = PlantAnalysis(
@@ -26,6 +30,7 @@ object MockPlants {
         watering = "한 달에 한 번, 흙이 완전히 마른 뒤",
         sunlight = Sunlight.PARTIAL_SHADE,
         rawDifficulty = 1,
+        category = PlantCategory.FOLIAGE,
     )
 
     /** rawDifficulty 가 일부러 범위를 벗어나 있다. 클램프 동작을 확인할 때 이 항목을 반환시킨다. */
@@ -37,6 +42,7 @@ object MockPlants {
         watering = "2~3주에 한 번 소량",
         sunlight = Sunlight.FULL_SUN,
         rawDifficulty = 7,
+        category = PlantCategory.FOLIAGE,
     )
 
     val Adiantum = PlantAnalysis(
@@ -47,5 +53,39 @@ object MockPlants {
         watering = "흙이 항상 촉촉하도록 매일 확인",
         sunlight = Sunlight.SHADE,
         rawDifficulty = 5,
+        category = PlantCategory.FOLIAGE,
+    )
+
+    val Violet = PlantAnalysis(
+        name = "제비꽃",
+        englishName = "Viola mandshurica",
+        description = "이른 봄 길가나 담벼락 틈에서 피는 보라색 야생화다. 씨앗을 튕겨 퍼뜨려 해마다 자리를 옮긴다.",
+        origin = "한국 전역의 들과 길가",
+        watering = "비가 오지 않는 날이 이어지면 한 번",
+        sunlight = Sunlight.FULL_SUN,
+        rawDifficulty = 2,
+        category = PlantCategory.WILDFLOWER,
+    )
+
+    val Dandelion = PlantAnalysis(
+        name = "민들레",
+        englishName = "Taraxacum platycarpum",
+        description = "노란 꽃이 지고 나면 씨앗이 갓털을 달고 바람에 날아간다. 뿌리가 깊어 밟혀도 금방 다시 올라온다.",
+        origin = "한국 전역의 빈터",
+        watering = "따로 주지 않아도 잘 자란다",
+        sunlight = Sunlight.FULL_SUN,
+        rawDifficulty = 1,
+        category = PlantCategory.WILDFLOWER,
+    )
+
+    val Tulip = PlantAnalysis(
+        name = "튤립",
+        englishName = "Tulipa gesneriana",
+        description = "가을에 구근을 심어 이듬해 봄에 꽃을 보는 구근식물이다. 꽃이 진 뒤 잎을 남겨 두어야 구근이 굵어진다.",
+        origin = "중앙아시아 고원",
+        watering = "싹이 올라온 뒤 흙이 마르면 한 번",
+        sunlight = Sunlight.FULL_SUN,
+        rawDifficulty = 3,
+        category = PlantCategory.BULB,
     )
 }

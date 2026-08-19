@@ -16,4 +16,5 @@ fun PlantAnalysis.toPlant(discoveredAt: Instant): Plant = Plant(
     sunlight = sunlight,
     difficulty = rawDifficulty.coerceIn(DIFFICULTY_MIN, DIFFICULTY_MAX),
     discoveredAt = discoveredAt,
+    category = category,
 )
