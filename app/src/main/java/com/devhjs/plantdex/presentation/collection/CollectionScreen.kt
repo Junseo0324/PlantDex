@@ -56,7 +56,7 @@ fun CollectionScreen(
                 value = state.query,
                 onValueChange = { onAction(CollectionAction.QueryChanged(it)) },
                 placeholder = stringResource(R.string.collection_search_placeholder),
-                modifier = Modifier.padding(top = 18.dp),
+                modifier = Modifier.padding(top = 16.dp),
             )
 
             Row(

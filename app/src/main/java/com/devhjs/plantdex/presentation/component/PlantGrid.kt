@@ -19,7 +19,7 @@ import com.devhjs.plantdex.presentation.designsystem.AppTextStyles
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 import kotlin.time.Instant
 
-private const val GRID_PHOTO_ASPECT_RATIO = 1.24f
+private const val GRID_PHOTO_ASPECT_RATIO = 1.46f
 private val GRID_GAP = 14.dp
 
 @Composable
