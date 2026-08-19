@@ -54,8 +54,8 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                     )
                 }
             }
-            entry<Route.Map> {
-                TabScaffold(Route.Map, backStack::switchTab) { PlaceholderScreen(title = "지도") }
+            entry<Route.Record> {
+                TabScaffold(Route.Record, backStack::switchTab) { PlaceholderScreen(title = "기록") }
             }
             entry<Route.Profile> {
                 TabScaffold(Route.Profile, backStack::switchTab) {
