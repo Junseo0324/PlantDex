@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.devhjs.plantdex.R
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
@@ -36,7 +39,13 @@ fun CameraBottomBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StripeSurface(
-            modifier = Modifier.size(46.dp),
+            modifier = Modifier
+                .size(46.dp)
+                .border(
+                    width = 1.5.dp,
+                    color = AppColors.OnDark.copy(alpha = 0.35f),
+                    shape = RoundedCornerShape(AppRadii.field),
+                ),
             shape = RoundedCornerShape(AppRadii.field),
             baseColor = AppColors.CharcoalRaise,
             stripeColor = AppColors.CharcoalRaise2,
@@ -51,7 +60,15 @@ fun CameraBottomBar(
             modifier = Modifier
                 .size(46.dp)
                 .border(1.5.dp, AppColors.OnDark.copy(alpha = 0.4f), CircleShape),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_camera_flip),
+                contentDescription = null,
+                modifier = Modifier.size(21.dp),
+                tint = AppColors.OnDarkMuted,
+            )
+        }
     }
 }
 
