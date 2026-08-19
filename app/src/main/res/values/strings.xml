@@ -89,6 +89,6 @@
     <!-- 바텀 네비 -->
     <string name="nav_home">홈</string>
     <string name="nav_collection">도감</string>
-    <string name="nav_map">지도</string>
+    <string name="nav_record">기록</string>
     <string name="nav_profile">내정보</string>
 </resources>
