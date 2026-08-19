@@ -61,7 +61,6 @@ object AppColors {
     val InkPlaceholder = Color(0xFF948A80) // 캡션 · 라벨
     val InkDisabled = Color(0xFFA79C90) // 비활성 라벨
     val InkFaint = Color(0xFFB0A79C) // 대기 상태
-    val DotInactive = Color(0xFFCFC5B7) // 비활성 인디케이터
 
     // ── Accents ───────────────────────────────────────────
     val Terracotta = Color(0xFFC9764A) // 메인 악센트 (CTA · 발견 연출)
