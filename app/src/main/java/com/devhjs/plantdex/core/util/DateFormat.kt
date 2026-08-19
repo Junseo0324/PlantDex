@@ -23,5 +23,19 @@ fun Instant.isSameMonthAs(other: Instant): Boolean {
         a.get(Calendar.MONTH) == b.get(Calendar.MONTH)
 }
 
-private fun Instant.toCalendar(): Calendar =
+/**
+ * 기기 시간대 기준 epoch day. 연속 발견 일수는 "하루 빼기"가 필요해서 연·월·일 대신 이 값으로 센다.
+ */
+fun Instant.toLocalEpochDay(): Long {
+    val millis = toEpochMilliseconds()
+    val calendar = toCalendar()
+    val offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET)
+    return Math.floorDiv(millis + offset, MILLIS_PER_DAY)
+}
+
+fun Instant.year(): Int = toCalendar().get(Calendar.YEAR)
+
+internal fun Instant.toCalendar(): Calendar =
     Calendar.getInstance().apply { timeInMillis = toEpochMilliseconds() }
+
+private const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000

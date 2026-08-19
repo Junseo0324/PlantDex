@@ -78,6 +78,7 @@ class MockDexRepositoryImpl @Inject constructor(
     }
 
     private companion object {
-        val SEED_AGES = listOf(2.days, 10.days, 45.days, 90.days)
+        /** MockPlants.All 과 길이·순서를 맞춘다. zip 이 조용히 잘라내므로 개수가 어긋나면 시드가 빈다. */
+        val SEED_AGES = listOf(1.days, 2.days, 3.days, 10.days, 45.days, 90.days, 150.days)
     }
 }
