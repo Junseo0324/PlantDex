@@ -18,7 +18,7 @@ sealed interface Route : NavKey {
     data object Collection : Tab
 
     @Serializable
-    data object Map : Tab
+    data object Record : Tab
 
     @Serializable
     data object Profile : Tab
