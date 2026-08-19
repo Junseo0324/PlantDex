@@ -32,6 +32,7 @@
 
     <!-- 상세 -->
     <string name="action_back">뒤로</string>
+    <string name="detail_share">공유</string>
     <string name="detail_favorite_add">도감에서 즐겨찾기에 추가</string>
     <string name="detail_favorite_remove">즐겨찾기에서 빼기</string>
     <string name="detail_memo_cta">메모 남기기</string>
