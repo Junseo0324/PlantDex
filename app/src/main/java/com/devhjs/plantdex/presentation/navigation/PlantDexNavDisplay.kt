@@ -19,6 +19,7 @@ import com.devhjs.plantdex.presentation.collection.CollectionScreenRoot
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.detail.DetailScreenRoot
 import com.devhjs.plantdex.presentation.home.HomeScreenRoot
+import com.devhjs.plantdex.presentation.record.RecordScreenRoot
 
 @Composable
 fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
@@ -55,7 +56,7 @@ fun PlantDexNavDisplay(modifier: Modifier = Modifier) {
                 }
             }
             entry<Route.Record> {
-                TabScaffold(Route.Record, backStack::switchTab) { PlaceholderScreen(title = "기록") }
+                TabScaffold(Route.Record, backStack::switchTab) { RecordScreenRoot() }
             }
             entry<Route.Profile> {
                 TabScaffold(Route.Profile, backStack::switchTab) {
