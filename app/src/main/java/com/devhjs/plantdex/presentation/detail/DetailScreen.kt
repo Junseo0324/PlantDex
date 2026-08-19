@@ -27,6 +27,7 @@ import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.Plant
 import com.devhjs.plantdex.domain.model.Sunlight
 import com.devhjs.plantdex.presentation.component.AppButton
+import com.devhjs.plantdex.presentation.component.AppIconButton
 import com.devhjs.plantdex.presentation.component.BackTopBar
 import com.devhjs.plantdex.presentation.component.FavoriteToggleButton
 import com.devhjs.plantdex.presentation.component.PhotoPlaceholder
@@ -41,7 +42,7 @@ import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 import com.devhjs.plantdex.presentation.text.labelRes
 import kotlin.time.Instant
 
-private const val DETAIL_PHOTO_ASPECT_RATIO = 1.58f
+private const val DETAIL_PHOTO_ASPECT_RATIO = 1.82f
 
 @Composable
 fun DetailScreen(
@@ -55,9 +56,16 @@ fun DetailScreen(
             .background(AppColors.Cream)
             .safeDrawingPadding(),
     ) {
+        // 공유는 아직 갈 곳이 없어서 표시만 한다.
         BackTopBar(
             onBack = { onAction(DetailAction.Back) },
             contentDescription = stringResource(R.string.action_back),
+            actions = {
+                AppIconButton(
+                    iconRes = R.drawable.ic_share,
+                    contentDescription = stringResource(R.string.detail_share),
+                )
+            },
         )
 
         val entry = state.entry ?: return@Column
