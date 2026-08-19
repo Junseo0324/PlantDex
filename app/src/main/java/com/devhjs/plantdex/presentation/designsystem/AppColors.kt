@@ -79,6 +79,12 @@ object AppColors {
     val OnDarkFaint = Color(0xFF9C9284)
     val OnAccent = Color(0xFFFFF9F4)
 
+    // ── Charts (기록 화면) ────────────────────────────────
+    val ChartBarDefault = Color(0xFFDFC9B4) // 일반 막대
+    val ChartTrack = Color(0xFFE7DFD3) // 진행바 트랙
+    val AccentSoft = Color(0xFFE8B893) // 다크 카드 위 악센트 텍스트
+    val CategoryBulb = Color(0xFFC4A87E) // 구근 (야생화=Terracotta, 관엽=Leaf 재사용)
+
     // ── Photo placeholder stripes ─────────────────────────
     val PlaceholderA = Color(0xFFE7E0D4)
     val PlaceholderB = Color(0xFFEFE9DF)
