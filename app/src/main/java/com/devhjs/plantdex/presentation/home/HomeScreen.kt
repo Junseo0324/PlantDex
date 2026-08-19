@@ -20,6 +20,7 @@ import com.devhjs.plantdex.R
 import com.devhjs.plantdex.domain.model.DexEntry
 import com.devhjs.plantdex.domain.model.Plant
 import com.devhjs.plantdex.domain.model.Sunlight
+import com.devhjs.plantdex.presentation.component.AppIconButton
 import com.devhjs.plantdex.presentation.component.AppTopBar
 import com.devhjs.plantdex.presentation.component.DiscoverCard
 import com.devhjs.plantdex.presentation.component.Greeting
@@ -45,7 +46,21 @@ fun HomeScreen(
             // 화면이 짧거나 글꼴 배율이 크면 내용이 잘리므로 스크롤을 둔다.
             .verticalScroll(rememberScrollState()),
     ) {
-        AppTopBar(title = stringResource(R.string.home_title))
+        // 검색·알림은 아직 갈 곳이 없어서 표시만 한다.
+        AppTopBar(
+            title = stringResource(R.string.home_title),
+            actions = {
+                AppIconButton(
+                    iconRes = R.drawable.ic_search,
+                    contentDescription = stringResource(R.string.home_search),
+                )
+                AppIconButton(
+                    iconRes = R.drawable.ic_bell,
+                    contentDescription = stringResource(R.string.home_notifications),
+                    showBadge = true,
+                )
+            },
+        )
 
         Column(modifier = Modifier.padding(horizontal = AppSpacing.screenH)) {
             Greeting(
