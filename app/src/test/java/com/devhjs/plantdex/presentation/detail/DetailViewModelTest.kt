@@ -12,7 +12,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -23,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Instant
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
 
     @get:Rule
@@ -65,7 +71,7 @@ class DetailViewModelTest {
 
     private fun subject() = DetailViewModel(getDexEntry, setFavorite, saveMemo)
 
-    private fun loadedSubject() = subject().apply { load(ENTRY_ID) }
+    private fun loadedSubject() = subject().apply { onAction(DetailAction.Load(ENTRY_ID)) }
 
     @Test
     fun `초기 상태는 기본값이다`() = runTest {
@@ -93,7 +99,7 @@ class DetailViewModelTest {
         val viewModel = loadedSubject()
         advanceUntilIdle()
 
-        repeat(3) { viewModel.load(ENTRY_ID) }
+        repeat(3) { viewModel.onAction(DetailAction.Load(ENTRY_ID)) }
         advanceUntilIdle()
 
         verify(exactly = 1) { getDexEntry(ENTRY_ID) }
@@ -104,7 +110,7 @@ class DetailViewModelTest {
         val viewModel = loadedSubject()
         advanceUntilIdle()
 
-        viewModel.load(99L)
+        viewModel.onAction(DetailAction.Load(99L))
         advanceUntilIdle()
 
         verify(exactly = 1) { getDexEntry(ENTRY_ID) }
@@ -256,8 +262,29 @@ class DetailViewModelTest {
         assertEquals("", state.memoDraft)
     }
 
+    private fun TestScope.collectEvents(viewModel: DetailViewModel): List<DetailEvent> {
+        val events = mutableListOf<DetailEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.event.toList(events)
+        }
+        return events
+    }
+
     @Test
-    fun `Back 은 ViewModel 에서 아무 일도 하지 않는다`() = runTest {
+    fun `Back 은 뒤로가기 이벤트를 낸다`() = runTest {
+        observed.value = entry()
+        val viewModel = loadedSubject()
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
+        viewModel.onAction(DetailAction.Back)
+        advanceUntilIdle()
+
+        assertEquals(listOf(DetailEvent.NavigateBack), events)
+    }
+
+    @Test
+    fun `Back 은 상태나 저장소를 건드리지 않는다`() = runTest {
         observed.value = entry()
         val viewModel = loadedSubject()
         advanceUntilIdle()

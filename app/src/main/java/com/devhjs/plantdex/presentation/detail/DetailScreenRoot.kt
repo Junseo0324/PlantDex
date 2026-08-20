@@ -17,18 +17,23 @@ fun DetailScreenRoot(
     modifier: Modifier = Modifier,
     viewModel: DetailViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(entryId) { viewModel.load(entryId) }
+    LaunchedEffect(entryId) {
+        viewModel.onAction(DetailAction.Load(entryId))
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.event.collect { event ->
+            when (event) {
+                DetailEvent.NavigateBack -> onBack()
+            }
+        }
+    }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     DetailScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                DetailAction.Back -> onBack()
-                else -> viewModel.onAction(action)
-            }
-        },
+        onAction = viewModel::onAction,
         modifier = modifier,
     )
 
