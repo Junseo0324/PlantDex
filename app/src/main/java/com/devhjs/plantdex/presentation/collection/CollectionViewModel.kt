@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.devhjs.plantdex.domain.usecase.GetDexCollectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -22,6 +24,9 @@ class CollectionViewModel @Inject constructor(
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
 
+    private val _event = MutableSharedFlow<CollectionEvent>()
+    val event = _event.asSharedFlow()
+
     init {
         fetchCollection()
     }
@@ -30,7 +35,9 @@ class CollectionViewModel @Inject constructor(
         when (action) {
             is CollectionAction.QueryChanged -> _state.update { it.copy(query = action.query) }
             is CollectionAction.FilterChanged -> _state.update { it.copy(filter = action.filter) }
-            is CollectionAction.OpenDetail -> Unit
+            is CollectionAction.OpenDetail -> viewModelScope.launch {
+                _event.emit(CollectionEvent.NavigateToDetail(action.entryId))
+            }
         }
     }
 

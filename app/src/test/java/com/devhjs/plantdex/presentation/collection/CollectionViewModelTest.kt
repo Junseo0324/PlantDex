@@ -9,7 +9,12 @@ import com.devhjs.plantdex.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -17,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Instant
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CollectionViewModelTest {
 
     @get:Rule
@@ -141,8 +147,29 @@ class CollectionViewModelTest {
         verify(exactly = 1) { getDexCollection("", false) }
     }
 
+    private fun TestScope.collectEvents(viewModel: CollectionViewModel): List<CollectionEvent> {
+        val events = mutableListOf<CollectionEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.event.toList(events)
+        }
+        return events
+    }
+
     @Test
-    fun `OpenDetail 은 ViewModel 에서 아무 일도 하지 않는다`() = runTest {
+    fun `OpenDetail 은 눌린 항목의 id 를 실어 보낸다`() = runTest {
+        collections.value = DexCollection(entries = listOf(entry(1, "몬스테라")), totalCount = 1)
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
+        viewModel.onAction(CollectionAction.OpenDetail(1L))
+        advanceUntilIdle()
+
+        assertEquals(listOf(CollectionEvent.NavigateToDetail(1L)), events)
+    }
+
+    @Test
+    fun `OpenDetail 은 상태나 재조회를 건드리지 않는다`() = runTest {
         collections.value = DexCollection(entries = listOf(entry(1, "몬스테라")), totalCount = 1)
         val viewModel = subject()
         advanceUntilIdle()

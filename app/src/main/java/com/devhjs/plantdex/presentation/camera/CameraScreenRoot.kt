@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
  */
 @Composable
 fun CameraScreenRoot(
-    onShutter: () -> Unit,
+    onCaptured: (photoUri: String?) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -22,7 +22,8 @@ fun CameraScreenRoot(
     CameraScreen(
         zoom = zoom,
         onZoomChange = { zoom = it },
-        onShutter = onShutter,
+        // TODO: CameraX 가 붙으면 촬영 결과 파일의 uri 를 넘긴다. 그때까지는 사진이 없다.
+        onShutter = { onCaptured(null) },
         onClose = onClose,
         modifier = modifier,
     )

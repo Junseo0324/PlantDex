@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.presentation.collection
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -14,14 +15,17 @@ fun CollectionScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel) {
+        viewModel.event.collect { event ->
+            when (event) {
+                is CollectionEvent.NavigateToDetail -> onOpenDetail(event.entryId)
+            }
+        }
+    }
+
     CollectionScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                is CollectionAction.OpenDetail -> onOpenDetail(action.entryId)
-                else -> viewModel.onAction(action)
-            }
-        },
+        onAction = viewModel::onAction,
         modifier = modifier,
     )
 }
