@@ -78,6 +78,12 @@
     <string name="camera_guide">식물을 화면 중앙에 맞춰주세요</string>
     <string name="camera_preview_caption">camera preview · tap to focus</string>
     <string name="camera_shutter">촬영</string>
+가    <string name="camera_permission_title">카메라 권한이 필요해요</string>
+    <string name="camera_permission_body">식물을 촬영해 도감에 등록하려면 카메라 접근을 허용해주세요.</string>
+    <string name="camera_permission_action">권한 허용</string>
+    <string name="camera_permission_denied_title">카메라 권한이 꺼져 있어요</string>
+    <string name="camera_permission_denied_body">설정 &gt; 앱 &gt; PlantDex 에서 카메라 권한을 켜주세요.</string>
+    <string name="camera_permission_denied_action">설정 열기</string>
 
     <!-- 도감 -->
     <string name="collection_title">나의 식물도감</string>
