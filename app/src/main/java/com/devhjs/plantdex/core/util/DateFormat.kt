@@ -16,6 +16,10 @@ fun Instant.toKoreanDate(): String =
 fun Instant.toDotDate(): String =
     SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(Date(toEpochMilliseconds()))
 
+/** 2026.03 형태. 가입 시점처럼 날짜까지는 필요 없는 자리에 쓴다. */
+fun Instant.toYearMonth(): String =
+    SimpleDateFormat("yyyy.MM", Locale.KOREA).format(Date(toEpochMilliseconds()))
+
 fun Instant.isSameMonthAs(other: Instant): Boolean {
     val a = toCalendar()
     val b = other.toCalendar()
