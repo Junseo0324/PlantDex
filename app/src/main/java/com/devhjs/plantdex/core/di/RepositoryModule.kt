@@ -1,7 +1,9 @@
 package com.devhjs.plantdex.core.di
 
 import com.devhjs.plantdex.data.repository.MockDexRepositoryImpl
+import com.devhjs.plantdex.data.repository.MockUserRepositoryImpl
 import com.devhjs.plantdex.domain.repository.DexRepository
+import com.devhjs.plantdex.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,4 +18,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindDexRepository(repository: MockDexRepositoryImpl): DexRepository
+
+    @Binds
+    abstract fun bindUserRepository(repository: MockUserRepositoryImpl): UserRepository
 }
