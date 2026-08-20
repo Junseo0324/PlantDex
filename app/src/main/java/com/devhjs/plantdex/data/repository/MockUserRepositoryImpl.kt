@@ -19,7 +19,7 @@ class MockUserRepositoryImpl @Inject constructor() : UserRepository {
     private companion object {
         /** 2026.03.02 */
         val MOCK_USER = UserProfile(
-            name = "이수현",
+            name = "홍길동",
             joinedAt = Instant.fromEpochMilliseconds(1_772_409_600_000),
         )
     }

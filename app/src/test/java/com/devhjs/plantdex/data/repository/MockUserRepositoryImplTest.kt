@@ -16,7 +16,7 @@ class MockUserRepositoryImplTest {
     fun `고정 사용자 한 명을 흘린다`() = runTest {
         val profile = subject.observeProfile().first()
 
-        assertEquals("이수현", profile.name)
+        assertEquals("홍길동", profile.name)
         assertTrue(profile.joinedAt.toEpochMilliseconds() > 0)
     }
 
