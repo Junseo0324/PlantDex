@@ -108,6 +108,33 @@
     <string name="category_bulb">구근</string>
     <string name="category_other">기타</string>
 
+    <!-- 내정보 -->
+    <string name="profile_title">내정보</string>
+    <string name="profile_settings">설정</string>
+    <string name="profile_level_badge">Lv.%1$d %2$s</string>
+    <string name="profile_joined">가입 %1$s</string>
+    <string name="profile_next_level">다음 레벨까지</string>
+    <string name="profile_next_level_progress">%1$d / %2$d종</string>
+    <string name="profile_stat_discovered">발견</string>
+    <string name="profile_stat_favorite">즐겨찾기</string>
+    <string name="profile_stat_memo">메모</string>
+
+    <!-- 레벨 칭호 -->
+    <string name="level_seedling">새싹</string>
+    <string name="level_observer">관찰자</string>
+    <string name="level_collector">수집가</string>
+    <string name="level_doctor">박사</string>
+
+    <!-- 설정 (아직 동작 없이 표시만 한다) -->
+    <string name="setting_notification">알림 설정</string>
+    <string name="setting_notification_value">켜짐</string>
+    <string name="setting_theme">테마</string>
+    <string name="setting_theme_value">라이트</string>
+    <string name="setting_backup">데이터 백업</string>
+    <string name="setting_help">도움말</string>
+    <string name="setting_app_info">앱 정보</string>
+    <string name="setting_app_info_value">1.0.0</string>
+
     <!-- 바텀 네비 -->
     <string name="nav_home">홈</string>
     <string name="nav_collection">도감</string>
