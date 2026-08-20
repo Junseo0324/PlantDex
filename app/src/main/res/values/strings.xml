@@ -78,7 +78,7 @@
     <string name="camera_guide">식물을 화면 중앙에 맞춰주세요</string>
     <string name="camera_preview_caption">camera preview · tap to focus</string>
     <string name="camera_shutter">촬영</string>
-가    <string name="camera_permission_title">카메라 권한이 필요해요</string>
+    <string name="camera_permission_title">카메라 권한이 필요해요</string>
     <string name="camera_permission_body">식물을 촬영해 도감에 등록하려면 카메라 접근을 허용해주세요.</string>
     <string name="camera_permission_action">권한 허용</string>
     <string name="camera_permission_denied_title">카메라 권한이 꺼져 있어요</string>
