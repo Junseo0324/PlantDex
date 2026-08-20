@@ -1,4 +1,4 @@
-package com.devhjs.plantdex.presentation.navigation
+package com.devhjs.plantdex.core.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -108,6 +108,9 @@ private enum class NavItem(
     Record(Route.Record, R.string.nav_record, R.drawable.ic_nav_record),
     Profile(Route.Profile, R.string.nav_profile, R.drawable.ic_nav_profile),
 }
+
+/** 탭 순서의 단일 출처. 선택된 탭을 인덱스로 저장할 때 기준이 된다. */
+internal val NavTabs: List<Route.Tab> = NavItem.entries.map(NavItem::tab)
 
 @Preview(showBackground = true, backgroundColor = 0xFFFBF8F3)
 @Composable

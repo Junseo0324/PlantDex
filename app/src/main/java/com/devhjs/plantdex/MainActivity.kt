@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
-import com.devhjs.plantdex.presentation.navigation.PlantDexNavDisplay
+import com.devhjs.plantdex.core.navigation.PlantDexNavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

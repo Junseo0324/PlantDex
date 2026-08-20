@@ -1,4 +1,4 @@
-package com.devhjs.plantdex.presentation.navigation
+package com.devhjs.plantdex.core.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 sealed interface Route : NavKey {
 
-    /** 바텀 네비 탭. 서로 쌓이지 않고 백스택 루트를 교체한다. */
+    /** 바텀 네비 탭. 탭마다 백스택을 따로 가진다. */
     sealed interface Tab : Route
 
     @Serializable
@@ -26,8 +26,9 @@ sealed interface Route : NavKey {
     @Serializable
     data object Camera : Route
 
+    /** 사진 자체는 키에 실을 수 없어 위치만 넘긴다. CameraX 가 붙기 전까지는 null 이다. */
     @Serializable
-    data object Analyze : Route
+    data class Analyze(val photoUri: String?) : Route
 
     @Serializable
     data class Detail(val entryId: Long) : Route
