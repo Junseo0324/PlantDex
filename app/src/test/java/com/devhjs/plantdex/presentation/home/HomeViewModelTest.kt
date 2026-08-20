@@ -9,8 +9,13 @@ import com.devhjs.plantdex.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -18,6 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Instant
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 
     @get:Rule
@@ -82,5 +88,46 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { getDexSummary(RECENT_LIMIT) }
+    }
+
+    private fun TestScope.collectEvents(viewModel: HomeViewModel): List<HomeEvent> {
+        val events = mutableListOf<HomeEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.event.toList(events)
+        }
+        return events
+    }
+
+    @Test
+    fun `Discover 는 카메라로 가는 이벤트를 낸다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(HomeAction.Discover)
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeEvent.NavigateToCamera), events)
+    }
+
+    @Test
+    fun `SeeAllCollection 은 도감 탭으로 가는 이벤트를 낸다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(HomeAction.SeeAllCollection)
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeEvent.NavigateToCollection), events)
+    }
+
+    @Test
+    fun `OpenDetail 은 눌린 항목의 id 를 실어 보낸다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(HomeAction.OpenDetail(7L))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeEvent.NavigateToDetail(7L)), events)
     }
 }

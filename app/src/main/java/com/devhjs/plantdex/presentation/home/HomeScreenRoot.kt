@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.presentation.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -16,15 +17,19 @@ fun HomeScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel) {
+        viewModel.event.collect { event ->
+            when (event) {
+                HomeEvent.NavigateToCamera -> onDiscover()
+                HomeEvent.NavigateToCollection -> onSeeAllCollection()
+                is HomeEvent.NavigateToDetail -> onOpenDetail(event.entryId)
+            }
+        }
+    }
+
     HomeScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                HomeAction.Discover -> onDiscover()
-                HomeAction.SeeAllCollection -> onSeeAllCollection()
-                is HomeAction.OpenDetail -> onOpenDetail(action.entryId)
-            }
-        },
+        onAction = viewModel::onAction,
         modifier = modifier,
     )
 }
