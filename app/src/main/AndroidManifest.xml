@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 카메라가 없는 기기에서도 갤러리로 등록할 수 있어 required 가 아니다. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
     <application
         android:name=".PlantDexApplication"
         android:allowBackup="true"
