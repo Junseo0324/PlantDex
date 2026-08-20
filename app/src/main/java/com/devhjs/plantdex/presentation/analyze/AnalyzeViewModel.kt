@@ -30,19 +30,26 @@ class AnalyzeViewModel @Inject constructor(
     private val _event = MutableSharedFlow<AnalyzeEvent>()
     val event = _event.asSharedFlow()
 
+    private var photoUri: String? = null
+    private var isStarted = false
     private var analyzeJob: Job? = null
     private var registerJob: Job? = null
 
-    init {
-        analyze()
-    }
-
     fun onAction(action: AnalyzeAction) {
         when (action) {
-            AnalyzeAction.Analyze -> analyze()
+            is AnalyzeAction.Start -> start(action.photoUri)
+            AnalyzeAction.Retry -> analyze()
             AnalyzeAction.Register -> register()
-            AnalyzeAction.Retake -> Unit // Root 가 처리한다
+            AnalyzeAction.Retake -> viewModelScope.launch { _event.emit(AnalyzeEvent.Retake) }
         }
+    }
+
+    /** Root 가 화면에 다시 들어올 때마다 보내므로 첫 번째만 받는다. */
+    private fun start(photoUri: String?) {
+        if (isStarted) return
+        isStarted = true
+        this.photoUri = photoUri
+        analyze()
     }
 
     private fun analyze() {
@@ -50,7 +57,7 @@ class AnalyzeViewModel @Inject constructor(
 
         analyzeJob = viewModelScope.launch {
             _state.value = AnalyzeState.Loading
-            _state.value = when (val result = analyzePlantPhoto(dummyPhoto())) {
+            _state.value = when (val result = analyzePlantPhoto(loadPhoto())) {
                 // 아직 등록 전이라 "등록하면 받게 될" 번호를 미리 읽어둔다.
                 is Result.Success -> AnalyzeState.Success(result.data, getNextDexNumber())
                 is Result.Error -> AnalyzeState.Error(result.error)
@@ -63,13 +70,13 @@ class AnalyzeViewModel @Inject constructor(
         if (registerJob?.isActive == true) return
 
         registerJob = viewModelScope.launch {
-            val entry = registerDexEntry(success.plant)
+            val entry = registerDexEntry(success.plant, photoUri)
             _event.emit(AnalyzeEvent.Registered(entry.id))
         }
     }
 
-    /** TODO: CameraX 촬영 화면이 붙으면 화면이 PlantPhoto 를 넘겨주고 이 함수는 삭제한다. */
-    private fun dummyPhoto() = PlantPhoto(ByteArray(DUMMY_PHOTO_SIZE) { it.toByte() })
+    /** TODO: CameraX 가 붙으면 photoUri 의 파일을 읽어 PlantPhoto 를 만든다. */
+    private fun loadPhoto() = PlantPhoto(ByteArray(DUMMY_PHOTO_SIZE) { it.toByte() })
 
     private companion object {
         const val DUMMY_PHOTO_SIZE = 1024

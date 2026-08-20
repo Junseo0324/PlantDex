@@ -34,16 +34,18 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
 /**
- * 촬영을 마치고 들어오는 화면이라 ViewModel 이 init 에서 분석을 시작한다.
- *
- * 그래서 subject 를 필드로 만들면 안 된다 — 필드 초기화는 MainDispatcherRule 이
- * Dispatchers.setMain 을 걸기 전에 실행돼서 init 의 코루틴이 실제 Main 으로 새어나간다.
+ * 촬영을 마치고 들어오는 화면이라 Root 가 Start 로 사진을 넘기면서 분석이 시작된다.
+ * 대부분의 테스트는 그 상태가 출발점이라 [started] 를 쓴다.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
+
+    private companion object {
+        const val PHOTO_URI = "file:///tmp/shot.jpg"
+    }
 
     private val analysis = PlantAnalysis(
         name = "몬스테라",
@@ -81,6 +83,10 @@ class AnalyzeViewModelTest {
         registerDexEntry,
     )
 
+    /** Root 가 화면 진입 시 보내는 Start 까지 마친 ViewModel. */
+    private fun started(photoUri: String? = PHOTO_URI) =
+        subject().apply { onAction(AnalyzeAction.Start(photoUri)) }
+
     private fun TestScope.collectEvents(viewModel: AnalyzeViewModel): List<AnalyzeEvent> {
         val events = mutableListOf<AnalyzeEvent>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -107,8 +113,16 @@ class AnalyzeViewModelTest {
     }
 
     @Test
-    fun `생성되면 따로 요청하지 않아도 분석이 시작된다`() = runTest {
-        val viewModel = subject()
+    fun `Start 전에는 분석하지 않는다`() = runTest {
+        subject()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { analyzer.analyze(any()) }
+    }
+
+    @Test
+    fun `Start 를 받으면 분석이 시작된다`() = runTest {
+        val viewModel = started()
 
         advanceUntilIdle()
 
@@ -116,9 +130,21 @@ class AnalyzeViewModelTest {
         assertTrue(viewModel.state.value is AnalyzeState.Success)
     }
 
+    /** Root 는 화면에 다시 들어올 때마다 Start 를 보낸다. */
+    @Test
+    fun `Start 를 다시 받아도 재분석하지 않는다`() = runTest {
+        val viewModel = started()
+        advanceUntilIdle()
+
+        repeat(3) { viewModel.onAction(AnalyzeAction.Start(PHOTO_URI)) }
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { analyzer.analyze(any()) }
+    }
+
     @Test
     fun `성공하면 Loading 다음 Success 로 바뀐다`() = runTest {
-        val viewModel = subject()
+        val viewModel = started()
         val states = collectStates(viewModel)
 
         advanceUntilIdle()
@@ -131,7 +157,7 @@ class AnalyzeViewModelTest {
     @Test
     fun `실패하면 Loading 다음 Error 로 바뀌고 에러 종류가 유지된다`() = runTest {
         givenError(AnalysisError.NotAPlant)
-        val viewModel = subject()
+        val viewModel = started()
         val states = collectStates(viewModel)
 
         advanceUntilIdle()
@@ -145,7 +171,7 @@ class AnalyzeViewModelTest {
     fun `발견일이 결과에 반영된다`() = runTest {
         val now = Instant.fromEpochMilliseconds(1_234_567_890)
         every { clock.now() } returns now
-        val viewModel = subject()
+        val viewModel = started()
 
         advanceUntilIdle()
 
@@ -158,9 +184,9 @@ class AnalyzeViewModelTest {
             delay(500.milliseconds)
             Result.Success(analysis)
         }
-        val viewModel = subject()
+        val viewModel = started()
 
-        repeat(3) { viewModel.onAction(AnalyzeAction.Analyze) }
+        repeat(3) { viewModel.onAction(AnalyzeAction.Retry) }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { analyzer.analyze(any()) }
@@ -170,12 +196,12 @@ class AnalyzeViewModelTest {
     @Test
     fun `실패한 뒤 재시도하면 다시 분석한다`() = runTest {
         givenError(AnalysisError.Network)
-        val viewModel = subject()
+        val viewModel = started()
         advanceUntilIdle()
         assertEquals(AnalyzeState.Error(AnalysisError.Network), viewModel.state.value)
 
         coEvery { analyzer.analyze(any()) } returns Result.Success(analysis)
-        viewModel.onAction(AnalyzeAction.Analyze)
+        viewModel.onAction(AnalyzeAction.Retry)
         advanceUntilIdle()
 
         coVerify(exactly = 2) { analyzer.analyze(any()) }
@@ -185,12 +211,12 @@ class AnalyzeViewModelTest {
     @Test
     fun `재시도하면 Loading 을 다시 거친다`() = runTest {
         givenError(AnalysisError.Network)
-        val viewModel = subject()
+        val viewModel = started()
         val states = collectStates(viewModel)
         advanceUntilIdle()
 
         coEvery { analyzer.analyze(any()) } returns Result.Success(analysis)
-        viewModel.onAction(AnalyzeAction.Analyze)
+        viewModel.onAction(AnalyzeAction.Retry)
         advanceUntilIdle()
 
         // Loading -> Error -> Loading -> Success
@@ -202,7 +228,7 @@ class AnalyzeViewModelTest {
     @Test
     fun `분석기에 비어있지 않은 사진이 전달된다`() = runTest {
         val captured = slot<PlantPhoto>()
-        subject()
+        started()
 
         advanceUntilIdle()
 
@@ -213,7 +239,7 @@ class AnalyzeViewModelTest {
     @Test
     fun `성공 상태에 등록하면 받게 될 번호가 실린다`() = runTest {
         coEvery { getNextDexNumber() } returns 7
-        val viewModel = subject()
+        val viewModel = started()
 
         advanceUntilIdle()
 
@@ -222,18 +248,18 @@ class AnalyzeViewModelTest {
 
     @Test
     fun `Register 는 분석된 식물을 도감에 등록한다`() = runTest {
-        val viewModel = subject()
+        val viewModel = started()
         advanceUntilIdle()
 
         viewModel.onAction(AnalyzeAction.Register)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { registerDexEntry(match { it.name == "몬스테라" }, null) }
+        coVerify(exactly = 1) { registerDexEntry(match { it.name == "몬스테라" }, PHOTO_URI) }
     }
 
     @Test
     fun `등록되면 Registered 이벤트가 나온다`() = runTest {
-        val viewModel = subject()
+        val viewModel = started()
         val events = collectEvents(viewModel)
         advanceUntilIdle()
 
@@ -246,7 +272,7 @@ class AnalyzeViewModelTest {
     @Test
     fun `성공하기 전에는 Register 가 아무것도 하지 않는다`() = runTest {
         givenError(AnalysisError.Network)
-        val viewModel = subject()
+        val viewModel = started()
         advanceUntilIdle()
 
         viewModel.onAction(AnalyzeAction.Register)
@@ -261,7 +287,7 @@ class AnalyzeViewModelTest {
             delay(500.milliseconds)
             registeredEntry
         }
-        val viewModel = subject()
+        val viewModel = started()
         advanceUntilIdle()
 
         repeat(3) { viewModel.onAction(AnalyzeAction.Register) }
@@ -271,8 +297,8 @@ class AnalyzeViewModelTest {
     }
 
     @Test
-    fun `Retake 는 ViewModel 에서 아무것도 하지 않는다`() = runTest {
-        val viewModel = subject()
+    fun `Retake 는 재촬영 이벤트를 낸다`() = runTest {
+        val viewModel = started()
         val events = collectEvents(viewModel)
         advanceUntilIdle()
         val before = viewModel.state.value
@@ -280,8 +306,8 @@ class AnalyzeViewModelTest {
         viewModel.onAction(AnalyzeAction.Retake)
         advanceUntilIdle()
 
+        assertEquals(listOf(AnalyzeEvent.Retake), events)
         assertEquals(before, viewModel.state.value)
-        assertEquals(emptyList<AnalyzeEvent>(), events)
         coVerify(exactly = 0) { registerDexEntry(any(), any()) }
     }
 }

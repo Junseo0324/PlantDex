@@ -206,7 +206,7 @@ fun AnalyzeScreen(
                     )
                     AppButton(
                         text = stringResource(R.string.analyze_retry),
-                        onClick = { onAction(AnalyzeAction.Analyze) },
+                        onClick = { onAction(AnalyzeAction.Retry) },
                         modifier = Modifier.padding(top = 10.dp),
                         containerColor = AppColors.Terracotta,
                         contentColor = AppColors.OnAccent,

@@ -1,8 +1,12 @@
 package com.devhjs.plantdex.presentation.analyze
 
 sealed interface AnalyzeAction {
-    /** 실패 후 재시도. 최초 분석은 ViewModel 이 init 에서 시작한다. */
-    data object Analyze : AnalyzeAction
+    /** 화면에 들어올 때 Root 가 촬영한 사진을 넘긴다. */
+    data class Start(val photoUri: String?) : AnalyzeAction
+
+    /** 재시도. 사진은 ViewModel 이 들고 있는 걸 그대로 쓴다. */
+    data object Retry : AnalyzeAction
+
     data object Register : AnalyzeAction
 
     data object Retake : AnalyzeAction

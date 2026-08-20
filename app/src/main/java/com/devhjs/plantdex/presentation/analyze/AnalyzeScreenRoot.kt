@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 fun AnalyzeScreenRoot(
+    photoUri: String?,
     onRegistered: (Long) -> Unit,
     onRetake: () -> Unit,
     modifier: Modifier = Modifier,
@@ -19,23 +20,23 @@ fun AnalyzeScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // 등록 후 이동은 한 번만 일어나야 해서 상태가 아니라 이벤트로 받는다.
-    LaunchedEffect(Unit) {
+    LaunchedEffect(photoUri) {
+        viewModel.onAction(AnalyzeAction.Start(photoUri))
+    }
+
+    // 이동은 한 번만 일어나야 해서 상태가 아니라 이벤트로 받는다.
+    LaunchedEffect(viewModel) {
         viewModel.event.collect { event ->
             when (event) {
                 is AnalyzeEvent.Registered -> onRegistered(event.entryId)
+                AnalyzeEvent.Retake -> onRetake()
             }
         }
     }
 
     AnalyzeScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                AnalyzeAction.Retake -> onRetake()
-                else -> viewModel.onAction(action)
-            }
-        },
+        onAction = viewModel::onAction,
         modifier = modifier,
     )
 }
