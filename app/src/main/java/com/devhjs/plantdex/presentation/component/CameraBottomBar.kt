@@ -26,15 +26,13 @@ import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 
-/**
- * 갤러리 · 셔터 · 전환 한 줄.
- *
- * 갤러리는 아직 동작이 없어서 clickable 을 붙이지 않는다. 콜백이 생기면 붙인다.
- */
+/** 갤러리 · 셔터 · 전환 한 줄. */
 @Composable
 fun CameraBottomBar(
+    onGallery: () -> Unit,
     onShutter: () -> Unit,
     onFlipLens: () -> Unit,
+    galleryContentDescription: String,
     shutterContentDescription: String,
     flipContentDescription: String,
     modifier: Modifier = Modifier,
@@ -52,7 +50,9 @@ fun CameraBottomBar(
                     width = 1.5.dp,
                     color = AppColors.OnDark.copy(alpha = 0.35f),
                     shape = RoundedCornerShape(AppRadii.field),
-                ),
+                )
+                .clickable(role = Role.Button, onClick = onGallery)
+                .semantics { contentDescription = galleryContentDescription },
             shape = RoundedCornerShape(AppRadii.field),
             baseColor = AppColors.CharcoalRaise,
             stripeColor = AppColors.CharcoalRaise2,
@@ -88,8 +88,10 @@ fun CameraBottomBar(
 private fun CameraBottomBarPreview() {
     PlantDexTheme {
         CameraBottomBar(
+            onGallery = {},
             onShutter = {},
             onFlipLens = {},
+            galleryContentDescription = "갤러리에서 고르기",
             shutterContentDescription = "촬영",
             flipContentDescription = "전후면 전환",
             modifier = Modifier.padding(horizontal = 44.dp, vertical = 26.dp),
@@ -102,8 +104,10 @@ private fun CameraBottomBarPreview() {
 private fun CameraBottomBarCapturingPreview() {
     PlantDexTheme {
         CameraBottomBar(
+            onGallery = {},
             onShutter = {},
             onFlipLens = {},
+            galleryContentDescription = "갤러리에서 고르기",
             shutterContentDescription = "촬영",
             flipContentDescription = "전후면 전환",
             modifier = Modifier.padding(horizontal = 44.dp, vertical = 26.dp),
