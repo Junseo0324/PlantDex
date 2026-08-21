@@ -1,8 +1,10 @@
 package com.devhjs.plantdex.presentation.camera
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,21 +29,24 @@ import com.devhjs.plantdex.R
 import com.devhjs.plantdex.presentation.component.AppIconButton
 import com.devhjs.plantdex.presentation.component.CameraBottomBar
 import com.devhjs.plantdex.presentation.component.CameraFocusOverlay
+import com.devhjs.plantdex.presentation.component.CameraPreviewPlaceholder
 import com.devhjs.plantdex.presentation.component.FilterChip
-import com.devhjs.plantdex.presentation.component.StripeSurface
 import com.devhjs.plantdex.presentation.designsystem.AppColors
 import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.AppSpacing
 import com.devhjs.plantdex.presentation.designsystem.AppTextStyles
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
+import com.devhjs.plantdex.presentation.text.labelRes
 
+/**
+ * [previewContent] 는 CameraX 프리뷰 자리다. @Preview 는 카메라를 열 수 없어 기본값을 쓴다.
+ */
 @Composable
 fun CameraScreen(
-    zoom: CameraZoom,
-    onZoomChange: (CameraZoom) -> Unit,
-    onShutter: () -> Unit,
-    onClose: () -> Unit,
+    state: CameraState,
+    onAction: (CameraAction) -> Unit,
     modifier: Modifier = Modifier,
+    previewContent: @Composable BoxScope.() -> Unit = { CameraPreviewPlaceholder() },
 ) {
     // 배경은 상태바 뒤까지 깔고 콘텐츠에만 인셋을 준다.
     Box(
@@ -58,15 +65,17 @@ fun CameraScreen(
                 AppIconButton(
                     iconRes = R.drawable.ic_close,
                     contentDescription = stringResource(R.string.camera_close),
-                    onClick = onClose,
+                    onClick = { onAction(CameraAction.Close) },
                     containerColor = AppColors.OnDark.copy(alpha = 0.14f),
                     tint = AppColors.OnDark,
                 )
-                // 디자인이 "자동" 고정 표시라 토글하지 않는다.
+                // 아이콘은 한 종류뿐이라 라벨로만 상태를 보인다.
                 FilterChip(
-                    label = stringResource(R.string.camera_flash_auto),
-                    isSelected = false,
-                    onClick = {},
+                    label = stringResource(state.flash.labelRes()),
+                    isSelected = state.flash != CameraFlash.AUTO,
+                    onClick = { onAction(CameraAction.ToggleFlash) },
+                    selectedContainerColor = AppColors.Cream,
+                    selectedContentColor = AppColors.Charcoal,
                     unselectedContainerColor = AppColors.OnDark.copy(alpha = 0.14f),
                     unselectedContentColor = AppColors.OnDark,
                     leadingIcon = {
@@ -74,21 +83,28 @@ fun CameraScreen(
                             painter = painterResource(R.drawable.ic_flash),
                             contentDescription = null,
                             modifier = Modifier.size(15.dp),
-                            tint = AppColors.OnDark,
+                            tint = if (state.flash == CameraFlash.AUTO) {
+                                AppColors.OnDark
+                            } else {
+                                AppColors.Charcoal
+                            },
                         )
                     },
                 )
             }
 
-            StripeSurface(
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(AppRadii.hero),
-                baseColor = AppColors.CharcoalRaise,
-                stripeColor = AppColors.CharcoalRaise2,
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(AppRadii.hero))
+                    .pointerInput(Unit) {
+                        detectTapGestures { offset -> onAction(CameraAction.FocusAt(offset)) }
+                    },
             ) {
+                previewContent()
+
                 Text(
                     text = stringResource(R.string.camera_guide),
                     style = AppTextStyles.Body.copy(color = AppColors.OnDarkMuted),
@@ -98,7 +114,7 @@ fun CameraScreen(
                         .padding(top = 22.dp),
                 )
 
-                CameraFocusOverlay()
+                CameraFocusOverlay(modifier = Modifier.align(Alignment.Center))
 
                 Text(
                     text = stringResource(R.string.camera_preview_caption),
@@ -118,8 +134,8 @@ fun CameraScreen(
                 CameraZoom.entries.forEach { entry ->
                     FilterChip(
                         label = entry.label,
-                        isSelected = entry == zoom,
-                        onClick = { onZoomChange(entry) },
+                        isSelected = entry == state.zoom,
+                        onClick = { onAction(CameraAction.SelectZoom(entry)) },
                         selectedContainerColor = AppColors.Cream,
                         selectedContentColor = AppColors.Charcoal,
                         unselectedContainerColor = AppColors.OnDark.copy(alpha = 0.14f),
@@ -129,9 +145,12 @@ fun CameraScreen(
             }
 
             CameraBottomBar(
-                onShutter = onShutter,
+                onShutter = { onAction(CameraAction.Shutter) },
+                onFlipLens = { onAction(CameraAction.ToggleLens) },
                 shutterContentDescription = stringResource(R.string.camera_shutter),
+                flipContentDescription = stringResource(R.string.camera_flip_lens),
                 modifier = Modifier.padding(start = 44.dp, end = 44.dp, top = 26.dp, bottom = 44.dp),
+                isShutterEnabled = !state.isCapturing,
             )
         }
     }
@@ -141,7 +160,7 @@ fun CameraScreen(
 @Composable
 private fun CameraScreenPreview() {
     PlantDexTheme {
-        CameraScreen(zoom = CameraZoom.X1, onZoomChange = {}, onShutter = {}, onClose = {})
+        CameraScreen(state = CameraState(), onAction = {})
     }
 }
 
@@ -149,6 +168,22 @@ private fun CameraScreenPreview() {
 @Composable
 private fun CameraScreenZoomedPreview() {
     PlantDexTheme {
-        CameraScreen(zoom = CameraZoom.X2, onZoomChange = {}, onShutter = {}, onClose = {})
+        CameraScreen(state = CameraState(zoom = CameraZoom.X2), onAction = {})
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF221E1A, heightDp = 780)
+@Composable
+private fun CameraScreenFlashOnPreview() {
+    PlantDexTheme {
+        CameraScreen(state = CameraState(flash = CameraFlash.ON), onAction = {})
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF221E1A, heightDp = 780)
+@Composable
+private fun CameraScreenCapturingPreview() {
+    PlantDexTheme {
+        CameraScreen(state = CameraState(isCapturing = true), onAction = {})
     }
 }
