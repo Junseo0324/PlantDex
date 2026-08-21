@@ -27,10 +27,16 @@ class AndroidPhotoStore @Inject constructor(
 
     override suspend fun save(sourceUri: String): String? = withContext(Dispatchers.IO) {
         runCatching {
+            val source = sourceUri.toUri()
             val target = File(photosDir, newFileName())
-            context.contentResolver.openInputStream(sourceUri.toUri())?.use { input ->
-                target.outputStream().use(input::copyTo)
-            } ?: return@runCatching null
+
+            // 카메라가 캐시에 찍어둔 것은 옮기기만 하면 된다. 복사하면 원본이 캐시에 남는다.
+            val moved = source.toCacheFileOrNull()?.renameTo(target) == true
+            if (!moved) {
+                context.contentResolver.openInputStream(source)?.use { input ->
+                    target.outputStream().use(input::copyTo)
+                } ?: return@runCatching null
+            }
 
             Uri.fromFile(target).toString()
         }.getOrNull()
@@ -51,4 +57,7 @@ class AndroidPhotoStore @Inject constructor(
 
     private fun Uri.toFileOrNull(): File? =
         path?.takeIf { scheme == "file" }?.let(::File)
+
+    private fun Uri.toCacheFileOrNull(): File? =
+        toFileOrNull()?.takeIf { it.parentFile == context.cacheDir }
 }

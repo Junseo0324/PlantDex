@@ -1,7 +1,7 @@
 package com.devhjs.plantdex.presentation.camera
 
 import androidx.compose.ui.geometry.Offset
-import com.devhjs.plantdex.domain.usecase.SavePickedPhotoUseCase
+import com.devhjs.plantdex.domain.usecase.SavePhotoUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -28,16 +28,17 @@ class CameraViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private companion object {
-        const val PHOTO_URI = "file:///data/photos/1.jpg"
+        /** CameraX 가 찍어둔 임시 위치. 보관 위치와 다르다. */
+        const val CAPTURE_URI = "file:///cache/capture-1.jpg"
         const val CONTENT_URI = "content://media/picker/0/1"
         const val SAVED_URI = "file:///data/photos/1-abc.jpg"
     }
 
-    private val savePickedPhoto = mockk<SavePickedPhotoUseCase> {
+    private val savePhoto = mockk<SavePhotoUseCase> {
         coEvery { this@mockk(any()) } returns SAVED_URI
     }
 
-    private fun subject() = CameraViewModel(savePickedPhoto)
+    private fun subject() = CameraViewModel(savePhoto)
 
     private fun TestScope.collectEvents(viewModel: CameraViewModel): List<CameraEvent> {
         val events = mutableListOf<CameraEvent>()
@@ -118,24 +119,40 @@ class CameraViewModelTest {
         assertEquals(listOf(CameraEvent.RequestCapture), events)
     }
 
+    /** 임시 위치는 밖으로 나가면 안 된다. 갤러리와 같은 저장 경로를 탄다. */
     @Test
-    fun `촬영 결과가 오면 촬영 중이 풀리고 사진 위치가 실린다`() = runTest {
+    fun `촬영한 사진도 보관 위치로 바뀌어 나간다`() = runTest {
         val viewModel = capturing()
         val events = collectEvents(viewModel)
 
-        viewModel.onAction(CameraAction.Captured(PHOTO_URI))
+        viewModel.onAction(CameraAction.Captured(CAPTURE_URI))
         advanceUntilIdle()
 
+        coVerify(exactly = 1) { savePhoto(CAPTURE_URI) }
         assertFalse(viewModel.state.value.isCapturing)
-        assertEquals(listOf(CameraEvent.Captured(PHOTO_URI)), events)
+        assertEquals(listOf(CameraEvent.Captured(SAVED_URI)), events)
     }
 
     @Test
-    fun `촬영에 실패하면 실패 이벤트가 나온다`() = runTest {
+    fun `촬영에 실패하면 보관하지 않고 실패 이벤트를 낸다`() = runTest {
         val viewModel = capturing()
         val events = collectEvents(viewModel)
 
         viewModel.onAction(CameraAction.Captured(null))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { savePhoto(any()) }
+        assertFalse(viewModel.state.value.isCapturing)
+        assertEquals(listOf(CameraEvent.CaptureFailed), events)
+    }
+
+    @Test
+    fun `찍었지만 보관에 실패하면 실패 이벤트를 낸다`() = runTest {
+        coEvery { savePhoto(any()) } returns null
+        val viewModel = capturing()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(CameraAction.Captured(CAPTURE_URI))
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isCapturing)
@@ -145,7 +162,7 @@ class CameraViewModelTest {
     @Test
     fun `촬영을 마치면 다시 찍을 수 있다`() = runTest {
         val viewModel = capturing()
-        viewModel.onAction(CameraAction.Captured(PHOTO_URI))
+        viewModel.onAction(CameraAction.Captured(CAPTURE_URI))
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
@@ -162,9 +179,10 @@ class CameraViewModelTest {
         val viewModel = subject()
         val events = collectEvents(viewModel)
 
-        viewModel.onAction(CameraAction.Captured(PHOTO_URI))
+        viewModel.onAction(CameraAction.Captured(CAPTURE_URI))
         advanceUntilIdle()
 
+        coVerify(exactly = 0) { savePhoto(any()) }
         assertEquals(CameraState(), viewModel.state.value)
         assertTrue(events.isEmpty())
     }
@@ -189,7 +207,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(CameraEvent.RequestGallery), events)
-        coVerify(exactly = 0) { savePickedPhoto(any()) }
+        coVerify(exactly = 0) { savePhoto(any()) }
     }
 
     /** 갤러리가 준 위치는 오래 못 쓰므로 반드시 복사한 위치가 나가야 한다. */
@@ -201,14 +219,14 @@ class CameraViewModelTest {
         viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI))
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { savePickedPhoto(CONTENT_URI) }
+        coVerify(exactly = 1) { savePhoto(CONTENT_URI) }
         assertEquals(listOf(CameraEvent.Captured(SAVED_URI)), events)
         assertFalse(viewModel.state.value.isCapturing)
     }
 
     @Test
     fun `복사에 실패하면 실패 이벤트가 나온다`() = runTest {
-        coEvery { savePickedPhoto(any()) } returns null
+        coEvery { savePhoto(any()) } returns null
         val viewModel = subject()
         val events = collectEvents(viewModel)
 
@@ -221,7 +239,7 @@ class CameraViewModelTest {
 
     @Test
     fun `복사하는 동안에는 셔터가 잠긴다`() = runTest {
-        coEvery { savePickedPhoto(any()) } coAnswers {
+        coEvery { savePhoto(any()) } coAnswers {
             delay(500.milliseconds)
             SAVED_URI
         }
@@ -234,7 +252,7 @@ class CameraViewModelTest {
 
     @Test
     fun `복사 중에 다시 골라도 한 번만 복사한다`() = runTest {
-        coEvery { savePickedPhoto(any()) } coAnswers {
+        coEvery { savePhoto(any()) } coAnswers {
             delay(500.milliseconds)
             SAVED_URI
         }
@@ -243,7 +261,7 @@ class CameraViewModelTest {
         repeat(3) { viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI)) }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { savePickedPhoto(any()) }
+        coVerify(exactly = 1) { savePhoto(any()) }
     }
 
     @Test

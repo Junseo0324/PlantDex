@@ -79,6 +79,7 @@
     <string name="camera_flash_off">끔</string>
     <string name="camera_flip_lens">전후면 전환</string>
     <string name="camera_gallery">갤러리에서 고르기</string>
+    <string name="camera_capture_failed">사진을 저장하지 못했어요</string>
     <string name="camera_guide">식물을 화면 중앙에 맞춰주세요</string>
     <string name="camera_preview_caption">camera preview · tap to focus</string>
     <string name="camera_shutter">촬영</string>

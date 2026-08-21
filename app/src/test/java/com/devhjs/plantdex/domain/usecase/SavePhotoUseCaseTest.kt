@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class SavePickedPhotoUseCaseTest {
+class SavePhotoUseCaseTest {
 
     private companion object {
         const val CONTENT_URI = "content://media/picker/0/1"
@@ -17,7 +17,7 @@ class SavePickedPhotoUseCaseTest {
     }
 
     private val photoStore = mockk<PhotoStore>()
-    private val subject = SavePickedPhotoUseCase(photoStore)
+    private val subject = SavePhotoUseCase(photoStore)
 
     @Test
     fun `복사한 위치를 그대로 돌려준다`() = runTest {

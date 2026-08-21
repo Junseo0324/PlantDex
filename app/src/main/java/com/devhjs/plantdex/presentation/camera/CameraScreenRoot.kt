@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -28,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -85,25 +87,38 @@ fun CameraScreenRoot(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(viewModel) {
-        viewModel.event.collect { event ->
-            when (event) {
-                // TODO: CameraXController 가 붙으면 capture() 결과를 Captured 로 되돌린다.
-                CameraEvent.RequestCapture -> viewModel.onAction(CameraAction.Captured(null))
-                is CameraEvent.Captured -> onCaptured(event.photoUri)
-                // TODO: 촬영이 진짜로 실패할 수 있게 되면 스낵바로 알린다.
-                CameraEvent.CaptureFailed -> onCaptured(null)
-                CameraEvent.RequestGallery -> galleryLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
-                is CameraEvent.RequestFocus -> Unit
-                CameraEvent.Close -> onClose()
+    if (isGranted) {
+        val controller = rememberCameraXController(state)
+        val captureFailed = stringResource(R.string.camera_capture_failed)
+
+        LaunchedEffect(viewModel, controller) {
+            viewModel.event.collect { event ->
+                when (event) {
+                    CameraEvent.RequestCapture ->
+                        viewModel.onAction(CameraAction.Captured(controller.capture()))
+                    is CameraEvent.Captured -> onCaptured(event.photoUri)
+                    CameraEvent.CaptureFailed ->
+                        Toast.makeText(context, captureFailed, Toast.LENGTH_SHORT).show()
+                    CameraEvent.RequestGallery -> galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                    is CameraEvent.RequestFocus -> controller.focusAt(event.offset)
+                    CameraEvent.Close -> onClose()
+                }
             }
         }
-    }
 
-    if (isGranted) {
-        CameraScreen(state = state, onAction = viewModel::onAction, modifier = modifier)
+        CameraScreen(
+            state = state,
+            onAction = viewModel::onAction,
+            modifier = modifier,
+            previewContent = {
+                AndroidView(
+                    factory = { controller.previewView },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            },
+        )
     } else {
         CameraPermissionGate(
             isPermanentlyDenied = hasAsked && activity?.canAskCameraAgain() == false,

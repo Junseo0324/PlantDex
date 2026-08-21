@@ -2,7 +2,7 @@ package com.devhjs.plantdex.presentation.camera
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devhjs.plantdex.domain.usecase.SavePickedPhotoUseCase
+import com.devhjs.plantdex.domain.usecase.SavePhotoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val savePickedPhoto: SavePickedPhotoUseCase,
+    private val savePhoto: SavePhotoUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CameraState())
@@ -46,24 +46,26 @@ class CameraViewModel @Inject constructor(
         emit(CameraEvent.RequestCapture)
     }
 
-    /** 촬영을 요청한 적이 없으면 들어온 결과를 버린다. */
-    private fun captured(photoUri: String?) {
+    /**
+     * 촬영을 요청한 적이 없으면 들어온 결과를 버린다.
+     * 카메라는 임시 위치에 찍으므로 갤러리와 같은 저장 경로를 태운다.
+     */
+    private fun captured(sourceUri: String?) {
         if (!_state.value.isCapturing) return
-        _state.update { it.copy(isCapturing = false) }
-        emit(if (photoUri == null) CameraEvent.CaptureFailed else CameraEvent.Captured(photoUri))
+        viewModelScope.launch { finish(sourceUri?.let { savePhoto(it) }) }
     }
 
     private fun savePicked(contentUri: String) {
         if (_state.value.isCapturing) return
         _state.update { it.copy(isCapturing = true) }
+        viewModelScope.launch { finish(savePhoto(contentUri)) }
+    }
 
-        viewModelScope.launch {
-            val saved = savePickedPhoto(contentUri)
-            _state.update { it.copy(isCapturing = false) }
-            _event.emit(
-                if (saved == null) CameraEvent.CaptureFailed else CameraEvent.Captured(saved),
-            )
-        }
+    private suspend fun finish(photoUri: String?) {
+        _state.update { it.copy(isCapturing = false) }
+        _event.emit(
+            if (photoUri == null) CameraEvent.CaptureFailed else CameraEvent.Captured(photoUri),
+        )
     }
 
     private fun emit(event: CameraEvent) {
