@@ -3,7 +3,6 @@ package com.devhjs.plantdex.presentation.analyze
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devhjs.plantdex.core.util.Result
-import com.devhjs.plantdex.domain.model.PlantPhoto
 import com.devhjs.plantdex.domain.usecase.AnalyzePlantPhotoUseCase
 import com.devhjs.plantdex.domain.usecase.GetNextDexNumberUseCase
 import com.devhjs.plantdex.domain.usecase.RegisterDexEntryUseCase
@@ -57,7 +56,7 @@ class AnalyzeViewModel @Inject constructor(
 
         analyzeJob = viewModelScope.launch {
             _state.value = AnalyzeState.Loading
-            _state.value = when (val result = analyzePlantPhoto(loadPhoto())) {
+            _state.value = when (val result = analyzePlantPhoto(photoUri)) {
                 // 아직 등록 전이라 "등록하면 받게 될" 번호를 미리 읽어둔다.
                 is Result.Success -> AnalyzeState.Success(result.data, getNextDexNumber())
                 is Result.Error -> AnalyzeState.Error(result.error)
@@ -73,12 +72,5 @@ class AnalyzeViewModel @Inject constructor(
             val entry = registerDexEntry(success.plant, photoUri)
             _event.emit(AnalyzeEvent.Registered(entry.id))
         }
-    }
-
-    /** TODO: CameraX 가 붙으면 photoUri 의 파일을 읽어 PlantPhoto 를 만든다. */
-    private fun loadPhoto() = PlantPhoto(ByteArray(DUMMY_PHOTO_SIZE) { it.toByte() })
-
-    private companion object {
-        const val DUMMY_PHOTO_SIZE = 1024
     }
 }

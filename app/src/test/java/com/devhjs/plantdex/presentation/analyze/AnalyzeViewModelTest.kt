@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.presentation.analyze
 
 import com.devhjs.plantdex.core.util.Result
+import com.devhjs.plantdex.domain.datasource.PhotoLoader
 import com.devhjs.plantdex.domain.datasource.PlantAnalyzer
 import com.devhjs.plantdex.domain.mapper.toPlant
 import com.devhjs.plantdex.domain.model.AnalysisError
@@ -57,6 +58,10 @@ class AnalyzeViewModelTest {
         rawDifficulty = 2,
     )
 
+    private val photo = PlantPhoto(ByteArray(8))
+    private val photoLoader = mockk<PhotoLoader> {
+        coEvery { load(any()) } returns photo
+    }
     private val analyzer = mockk<PlantAnalyzer> {
         coEvery { analyze(any()) } returns Result.Success(analysis)
     }
@@ -78,7 +83,7 @@ class AnalyzeViewModelTest {
     }
 
     private fun subject() = AnalyzeViewModel(
-        AnalyzePlantPhotoUseCase(analyzer, clock),
+        AnalyzePlantPhotoUseCase(photoLoader, analyzer, clock),
         getNextDexNumber,
         registerDexEntry,
     )
@@ -226,14 +231,36 @@ class AnalyzeViewModelTest {
     }
 
     @Test
-    fun `분석기에 비어있지 않은 사진이 전달된다`() = runTest {
-        val captured = slot<PlantPhoto>()
+    fun `촬영한 사진 위치에서 읽어 분석기로 넘긴다`() = runTest {
+        val loaded = slot<PlantPhoto>()
         started()
 
         advanceUntilIdle()
 
-        coVerify { analyzer.analyze(capture(captured)) }
-        assertTrue(captured.captured.bytes.isNotEmpty())
+        coVerify(exactly = 1) { photoLoader.load(PHOTO_URI) }
+        coVerify { analyzer.analyze(capture(loaded)) }
+        assertEquals(photo, loaded.captured)
+    }
+
+    @Test
+    fun `사진을 읽지 못하면 분석하지 않고 에러 상태가 된다`() = runTest {
+        coEvery { photoLoader.load(any()) } returns null
+        val viewModel = started()
+
+        advanceUntilIdle()
+
+        assertEquals(AnalyzeState.Error(AnalysisError.PhotoUnavailable), viewModel.state.value)
+        coVerify(exactly = 0) { analyzer.analyze(any()) }
+    }
+
+    @Test
+    fun `사진 없이 들어오면 에러 상태가 된다`() = runTest {
+        val viewModel = started(photoUri = null)
+
+        advanceUntilIdle()
+
+        assertEquals(AnalyzeState.Error(AnalysisError.PhotoUnavailable), viewModel.state.value)
+        coVerify(exactly = 0) { photoLoader.load(any()) }
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.domain.usecase
 
 import com.devhjs.plantdex.core.util.Result
+import com.devhjs.plantdex.domain.datasource.PhotoLoader
 import com.devhjs.plantdex.domain.datasource.PlantAnalyzer
 import com.devhjs.plantdex.domain.model.AnalysisError
 import com.devhjs.plantdex.domain.model.PhotoFormat
@@ -21,11 +22,18 @@ import kotlin.time.Instant
 
 class AnalyzePlantPhotoUseCaseTest {
 
+    private companion object {
+        const val PHOTO_URI = "file:///data/photos/1-abc.jpg"
+    }
+
     private val photo = PlantPhoto(ByteArray(8), PhotoFormat.JPEG)
+    private val photoLoader = mockk<PhotoLoader> {
+        coEvery { load(any()) } returns photo
+    }
     private val analyzer = mockk<PlantAnalyzer>()
     private val clock = mockk<Clock>()
 
-    private val subject = AnalyzePlantPhotoUseCase(analyzer, clock)
+    private val subject = AnalyzePlantPhotoUseCase(photoLoader, analyzer, clock)
 
     private fun analysis(rawDifficulty: Int = 3) = PlantAnalysis(
         name = "몬스테라",
@@ -52,7 +60,7 @@ class AnalyzePlantPhotoUseCaseTest {
     private suspend fun analyzeWithDifficulty(rawDifficulty: Int): Int {
         givenAnalysis(analysis(rawDifficulty))
         givenNow()
-        return (subject(photo) as Result.Success).data.difficulty
+        return (subject(PHOTO_URI) as Result.Success).data.difficulty
     }
 
     @Test
@@ -80,7 +88,7 @@ class AnalyzePlantPhotoUseCaseTest {
         givenAnalysis(analysis())
         givenNow(now)
 
-        val result = subject(photo)
+        val result = subject(PHOTO_URI)
 
         assertEquals(now, (result as Result.Success).data.discoveredAt)
     }
@@ -93,8 +101,8 @@ class AnalyzePlantPhotoUseCaseTest {
             Instant.fromEpochMilliseconds(2_000),
         )
 
-        val first = (subject(photo) as Result.Success).data.discoveredAt
-        val second = (subject(photo) as Result.Success).data.discoveredAt
+        val first = (subject(PHOTO_URI) as Result.Success).data.discoveredAt
+        val second = (subject(PHOTO_URI) as Result.Success).data.discoveredAt
 
         assertEquals(Instant.fromEpochMilliseconds(1_000), first)
         assertEquals(Instant.fromEpochMilliseconds(2_000), second)
@@ -104,7 +112,7 @@ class AnalyzePlantPhotoUseCaseTest {
     fun `실패는 그대로 전달되고 Plant 를 만들지 않는다`() = runTest {
         givenError(AnalysisError.Network)
 
-        val result = subject(photo)
+        val result = subject(PHOTO_URI)
 
         assertTrue(result is Result.Error)
         assertEquals(AnalysisError.Network, (result as Result.Error).error)
@@ -115,7 +123,7 @@ class AnalyzePlantPhotoUseCaseTest {
     fun `실패 종류가 뭉개지지 않는다`() = runTest {
         givenError(AnalysisError.NotAPlant)
 
-        val result = subject(photo)
+        val result = subject(PHOTO_URI)
 
         assertEquals(AnalysisError.NotAPlant, (result as Result.Error).error)
     }
@@ -133,7 +141,7 @@ class AnalyzePlantPhotoUseCaseTest {
         )
         givenNow()
 
-        val plant = (subject(photo) as Result.Success).data
+        val plant = (subject(PHOTO_URI) as Result.Success).data
 
         assertEquals("몬스테라", plant.name)
         assertEquals("Monstera deliciosa", plant.englishName)
@@ -143,12 +151,34 @@ class AnalyzePlantPhotoUseCaseTest {
     }
 
     @Test
-    fun `사진이 분석기에 그대로 전달된다`() = runTest {
+    fun `읽어들인 사진이 분석기로 전달된다`() = runTest {
         givenAnalysis(analysis())
         givenNow()
 
-        subject(photo)
+        subject(PHOTO_URI)
 
+        coVerify(exactly = 1) { photoLoader.load(PHOTO_URI) }
         coVerify(exactly = 1) { analyzer.analyze(photo) }
+    }
+
+    /** 파일이 지워졌거나 읽을 수 없는 경우. 분석기에 보내볼 것 자체가 없다. */
+    @Test
+    fun `사진을 읽지 못하면 PhotoUnavailable 이다`() = runTest {
+        coEvery { photoLoader.load(any()) } returns null
+
+        val result = subject(PHOTO_URI)
+
+        assertEquals(AnalysisError.PhotoUnavailable, (result as Result.Error).error)
+        coVerify(exactly = 0) { analyzer.analyze(any()) }
+        verify(exactly = 0) { clock.now() }
+    }
+
+    @Test
+    fun `사진 위치가 없으면 읽지도 분석하지도 않는다`() = runTest {
+        val result = subject(null)
+
+        assertEquals(AnalysisError.PhotoUnavailable, (result as Result.Error).error)
+        coVerify(exactly = 0) { photoLoader.load(any()) }
+        coVerify(exactly = 0) { analyzer.analyze(any()) }
     }
 }
