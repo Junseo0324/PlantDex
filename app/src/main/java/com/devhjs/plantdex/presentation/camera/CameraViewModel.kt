@@ -2,6 +2,7 @@ package com.devhjs.plantdex.presentation.camera
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.devhjs.plantdex.domain.usecase.SavePickedPhotoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,9 @@ import javax.inject.Inject
  * 카메라 하드웨어는 Root 가 쥔다. 여기서는 UI 상태와 셔터 연타만 관리한다.
  */
 @HiltViewModel
-class CameraViewModel @Inject constructor() : ViewModel() {
+class CameraViewModel @Inject constructor(
+    private val savePickedPhoto: SavePickedPhotoUseCase,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(CameraState())
     val state = _state.asStateFlow()
@@ -30,6 +33,8 @@ class CameraViewModel @Inject constructor() : ViewModel() {
             CameraAction.ToggleLens -> _state.update { it.copy(lens = it.lens.flipped()) }
             CameraAction.Shutter -> shutter()
             is CameraAction.Captured -> captured(action.photoUri)
+            CameraAction.PickFromGallery -> emit(CameraEvent.RequestGallery)
+            is CameraAction.PickedFromGallery -> savePicked(action.contentUri)
             is CameraAction.FocusAt -> emit(CameraEvent.RequestFocus(action.offset))
             CameraAction.Close -> emit(CameraEvent.Close)
         }
@@ -46,6 +51,19 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         if (!_state.value.isCapturing) return
         _state.update { it.copy(isCapturing = false) }
         emit(if (photoUri == null) CameraEvent.CaptureFailed else CameraEvent.Captured(photoUri))
+    }
+
+    private fun savePicked(contentUri: String) {
+        if (_state.value.isCapturing) return
+        _state.update { it.copy(isCapturing = true) }
+
+        viewModelScope.launch {
+            val saved = savePickedPhoto(contentUri)
+            _state.update { it.copy(isCapturing = false) }
+            _event.emit(
+                if (saved == null) CameraEvent.CaptureFailed else CameraEvent.Captured(saved),
+            )
+        }
     }
 
     private fun emit(event: CameraEvent) {

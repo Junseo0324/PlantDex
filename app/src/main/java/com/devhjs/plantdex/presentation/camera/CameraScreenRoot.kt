@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -63,6 +64,13 @@ fun CameraScreenRoot(
         hasAsked = true
     }
 
+    // 취소하면 null 이 온다. 그때는 아무 일도 일어나지 않아야 한다.
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        uri?.let { viewModel.onAction(CameraAction.PickedFromGallery(it.toString())) }
+    }
+
     LaunchedEffect(Unit) {
         if (!isGranted) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
@@ -85,6 +93,9 @@ fun CameraScreenRoot(
                 is CameraEvent.Captured -> onCaptured(event.photoUri)
                 // TODO: 촬영이 진짜로 실패할 수 있게 되면 스낵바로 알린다.
                 CameraEvent.CaptureFailed -> onCaptured(null)
+                CameraEvent.RequestGallery -> galleryLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
                 is CameraEvent.RequestFocus -> Unit
                 CameraEvent.Close -> onClose()
             }

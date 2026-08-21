@@ -145,8 +145,10 @@ fun CameraScreen(
             }
 
             CameraBottomBar(
+                onGallery = { onAction(CameraAction.PickFromGallery) },
                 onShutter = { onAction(CameraAction.Shutter) },
                 onFlipLens = { onAction(CameraAction.ToggleLens) },
+                galleryContentDescription = stringResource(R.string.camera_gallery),
                 shutterContentDescription = stringResource(R.string.camera_shutter),
                 flipContentDescription = stringResource(R.string.camera_flip_lens),
                 modifier = Modifier.padding(start = 44.dp, end = 44.dp, top = 26.dp, bottom = 44.dp),

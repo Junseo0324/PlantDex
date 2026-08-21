@@ -1,8 +1,13 @@
 package com.devhjs.plantdex.presentation.camera
 
 import androidx.compose.ui.geometry.Offset
+import com.devhjs.plantdex.domain.usecase.SavePickedPhotoUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -14,6 +19,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CameraViewModelTest {
@@ -23,9 +29,15 @@ class CameraViewModelTest {
 
     private companion object {
         const val PHOTO_URI = "file:///data/photos/1.jpg"
+        const val CONTENT_URI = "content://media/picker/0/1"
+        const val SAVED_URI = "file:///data/photos/1-abc.jpg"
     }
 
-    private fun subject() = CameraViewModel()
+    private val savePickedPhoto = mockk<SavePickedPhotoUseCase> {
+        coEvery { this@mockk(any()) } returns SAVED_URI
+    }
+
+    private fun subject() = CameraViewModel(savePickedPhoto)
 
     private fun TestScope.collectEvents(viewModel: CameraViewModel): List<CameraEvent> {
         val events = mutableListOf<CameraEvent>()
@@ -166,6 +178,72 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(CameraEvent.RequestFocus(Offset(12f, 34f))), events)
+    }
+
+    @Test
+    fun `갤러리를 누르면 사진 선택을 요청한다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(CameraAction.PickFromGallery)
+        advanceUntilIdle()
+
+        assertEquals(listOf(CameraEvent.RequestGallery), events)
+        coVerify(exactly = 0) { savePickedPhoto(any()) }
+    }
+
+    /** 갤러리가 준 위치는 오래 못 쓰므로 반드시 복사한 위치가 나가야 한다. */
+    @Test
+    fun `고른 사진은 복사한 위치로 바뀌어 나간다`() = runTest {
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { savePickedPhoto(CONTENT_URI) }
+        assertEquals(listOf(CameraEvent.Captured(SAVED_URI)), events)
+        assertFalse(viewModel.state.value.isCapturing)
+    }
+
+    @Test
+    fun `복사에 실패하면 실패 이벤트가 나온다`() = runTest {
+        coEvery { savePickedPhoto(any()) } returns null
+        val viewModel = subject()
+        val events = collectEvents(viewModel)
+
+        viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI))
+        advanceUntilIdle()
+
+        assertEquals(listOf(CameraEvent.CaptureFailed), events)
+        assertFalse(viewModel.state.value.isCapturing)
+    }
+
+    @Test
+    fun `복사하는 동안에는 셔터가 잠긴다`() = runTest {
+        coEvery { savePickedPhoto(any()) } coAnswers {
+            delay(500.milliseconds)
+            SAVED_URI
+        }
+        val viewModel = subject()
+
+        viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI))
+
+        assertTrue(viewModel.state.value.isCapturing)
+    }
+
+    @Test
+    fun `복사 중에 다시 골라도 한 번만 복사한다`() = runTest {
+        coEvery { savePickedPhoto(any()) } coAnswers {
+            delay(500.milliseconds)
+            SAVED_URI
+        }
+        val viewModel = subject()
+
+        repeat(3) { viewModel.onAction(CameraAction.PickedFromGallery(CONTENT_URI)) }
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { savePickedPhoto(any()) }
     }
 
     @Test
