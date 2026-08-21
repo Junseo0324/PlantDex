@@ -1,8 +1,8 @@
 package com.devhjs.plantdex.presentation.camera
 
-/** 실제 확대는 CameraX 가 붙을 때 연결한다. 지금은 칩 선택 표시만 한다. */
-enum class CameraZoom(val label: String) {
-    X1("1x"),
-    X2("2x"),
-    X5("5x"),
+/** ratio 는 CameraX 의 setZoomRatio 에 그대로 넘긴다. */
+enum class CameraZoom(val label: String, val ratio: Float) {
+    X1("1x", 1f),
+    X2("2x", 2f),
+    X5("5x", 5f),
 }
