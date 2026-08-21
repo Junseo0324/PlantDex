@@ -8,6 +8,7 @@ import com.devhjs.plantdex.domain.model.AnalysisError
 @StringRes
 fun AnalysisError.titleRes(): Int = when (this) {
     AnalysisError.NotAPlant -> R.string.error_not_a_plant_title
+    AnalysisError.PhotoUnavailable -> R.string.error_photo_unavailable_title
     AnalysisError.Network -> R.string.error_network_title
     AnalysisError.Timeout,
     AnalysisError.QuotaExceeded,
@@ -19,6 +20,7 @@ fun AnalysisError.titleRes(): Int = when (this) {
 @StringRes
 fun AnalysisError.bodyRes(): Int = when (this) {
     AnalysisError.NotAPlant -> R.string.error_not_a_plant_body
+    AnalysisError.PhotoUnavailable -> R.string.error_photo_unavailable_body
     AnalysisError.Network -> R.string.error_network_body
     AnalysisError.Timeout,
     AnalysisError.QuotaExceeded,
