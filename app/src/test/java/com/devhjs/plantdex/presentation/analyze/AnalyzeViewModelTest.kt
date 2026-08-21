@@ -10,6 +10,7 @@ import com.devhjs.plantdex.domain.model.PlantAnalysis
 import com.devhjs.plantdex.domain.model.PlantPhoto
 import com.devhjs.plantdex.domain.model.Sunlight
 import com.devhjs.plantdex.domain.usecase.AnalyzePlantPhotoUseCase
+import com.devhjs.plantdex.domain.usecase.DeletePhotoUseCase
 import com.devhjs.plantdex.domain.usecase.GetNextDexNumberUseCase
 import com.devhjs.plantdex.domain.usecase.RegisterDexEntryUseCase
 import com.devhjs.plantdex.testing.MainDispatcherRule
@@ -81,11 +82,15 @@ class AnalyzeViewModelTest {
     private val registerDexEntry = mockk<RegisterDexEntryUseCase> {
         coEvery { this@mockk(any(), any()) } returns registeredEntry
     }
+    private val deletePhoto = mockk<DeletePhotoUseCase> {
+        coEvery { this@mockk(any()) } returns Unit
+    }
 
     private fun subject() = AnalyzeViewModel(
         AnalyzePlantPhotoUseCase(photoLoader, analyzer, clock),
         getNextDexNumber,
         registerDexEntry,
+        deletePhoto,
     )
 
     /** Root 가 화면 진입 시 보내는 Start 까지 마친 ViewModel. */
@@ -336,5 +341,37 @@ class AnalyzeViewModelTest {
         assertEquals(listOf(AnalyzeEvent.Retake), events)
         assertEquals(before, viewModel.state.value)
         coVerify(exactly = 0) { registerDexEntry(any(), any()) }
+    }
+
+    /** 등록하지 않고 나가므로 방금 찍은 사진이 저장소에 남으면 안 된다. */
+    @Test
+    fun `Retake 는 찍은 사진을 지운다`() = runTest {
+        val viewModel = started()
+        advanceUntilIdle()
+
+        viewModel.onAction(AnalyzeAction.Retake)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { deletePhoto(PHOTO_URI) }
+    }
+
+    @Test
+    fun `등록하면 사진을 지우지 않는다`() = runTest {
+        val viewModel = started()
+        advanceUntilIdle()
+
+        viewModel.onAction(AnalyzeAction.Register)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { deletePhoto(any()) }
+    }
+
+    @Test
+    fun `성공 상태에 찍은 사진 위치가 실린다`() = runTest {
+        val viewModel = started()
+
+        advanceUntilIdle()
+
+        assertEquals(PHOTO_URI, (viewModel.state.value as AnalyzeState.Success).photoUri)
     }
 }

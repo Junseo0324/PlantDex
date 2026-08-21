@@ -137,7 +137,10 @@ fun AnalyzeScreen(
                         style = AppTextStyles.Eyebrow,
                     )
 
-                    RevealPhoto(photoUri = null, contentDescription = state.plant.name)
+                    RevealPhoto(
+                        photoUri = state.photoUri,
+                        contentDescription = state.plant.name,
+                    )
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -241,7 +244,7 @@ private fun AnalyzeScreenLoadingPreview() {
 private fun AnalyzeScreenSuccessPreview() {
     PlantDexTheme {
         AnalyzeScreen(
-            state = AnalyzeState.Success(PreviewPlant, nextDexNumber = 5),
+            state = AnalyzeState.Success(PreviewPlant, nextDexNumber = 5, photoUri = null),
             onAction = {},
         )
     }

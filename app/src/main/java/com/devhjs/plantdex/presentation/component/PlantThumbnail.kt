@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.AppSpacing
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
@@ -26,11 +26,14 @@ fun PlantThumbnail(
     if (photoUri == null) {
         PhotoPlaceholder(modifier = modifier, shape = shape)
     } else {
-        AsyncImage(
+        // 파일이 지워졌을 수 있어 실패하면 빈 자리 대신 placeholder 로 돌아간다.
+        SubcomposeAsyncImage(
             model = photoUri,
             contentDescription = contentDescription,
             modifier = modifier.clip(shape),
             contentScale = ContentScale.Crop,
+            loading = { PhotoPlaceholder(shape = shape) },
+            error = { PhotoPlaceholder(shape = shape) },
         )
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,12 +31,13 @@ import com.devhjs.plantdex.presentation.component.AppButton
 import com.devhjs.plantdex.presentation.component.AppIconButton
 import com.devhjs.plantdex.presentation.component.BackTopBar
 import com.devhjs.plantdex.presentation.component.FavoriteToggleButton
-import com.devhjs.plantdex.presentation.component.PhotoPlaceholder
+import com.devhjs.plantdex.presentation.component.PlantThumbnail
 import com.devhjs.plantdex.presentation.component.SectionHeader
 import com.devhjs.plantdex.presentation.component.SpecList
 import com.devhjs.plantdex.presentation.component.SpecListRow
 import com.devhjs.plantdex.presentation.component.StarRating
 import com.devhjs.plantdex.presentation.designsystem.AppColors
+import com.devhjs.plantdex.presentation.designsystem.AppRadii
 import com.devhjs.plantdex.presentation.designsystem.AppSpacing
 import com.devhjs.plantdex.presentation.designsystem.AppTextStyles
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
@@ -77,10 +79,13 @@ fun DetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.screenH),
         ) {
-            PhotoPlaceholder(
+            PlantThumbnail(
+                photoUri = entry.photoUri,
+                contentDescription = entry.plant.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(DETAIL_PHOTO_ASPECT_RATIO),
+                shape = RoundedCornerShape(AppRadii.photo),
             )
 
             Column(modifier = Modifier.padding(top = 22.dp)) {
