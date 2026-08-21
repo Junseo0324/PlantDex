@@ -18,7 +18,7 @@ import com.devhjs.plantdex.presentation.designsystem.AppTextStyles
 import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 
 /**
- * 카메라가 붙기 전까지 사진 자리를 대신하는 placeholder.
+ * 사진이 없거나 읽지 못할 때 자리를 대신한다.
  */
 @Composable
 fun PhotoPlaceholder(

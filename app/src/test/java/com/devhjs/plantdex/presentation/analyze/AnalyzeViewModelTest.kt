@@ -94,7 +94,7 @@ class AnalyzeViewModelTest {
     )
 
     /** Root 가 화면 진입 시 보내는 Start 까지 마친 ViewModel. */
-    private fun started(photoUri: String? = PHOTO_URI) =
+    private fun started(photoUri: String = PHOTO_URI) =
         subject().apply { onAction(AnalyzeAction.Start(photoUri)) }
 
     private fun TestScope.collectEvents(viewModel: AnalyzeViewModel): List<AnalyzeEvent> {
@@ -258,15 +258,6 @@ class AnalyzeViewModelTest {
         coVerify(exactly = 0) { analyzer.analyze(any()) }
     }
 
-    @Test
-    fun `사진 없이 들어오면 에러 상태가 된다`() = runTest {
-        val viewModel = started(photoUri = null)
-
-        advanceUntilIdle()
-
-        assertEquals(AnalyzeState.Error(AnalysisError.PhotoUnavailable), viewModel.state.value)
-        coVerify(exactly = 0) { photoLoader.load(any()) }
-    }
 
     @Test
     fun `성공 상태에 등록하면 받게 될 번호가 실린다`() = runTest {

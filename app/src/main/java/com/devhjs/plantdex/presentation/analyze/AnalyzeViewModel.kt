@@ -31,7 +31,7 @@ class AnalyzeViewModel @Inject constructor(
     private val _event = MutableSharedFlow<AnalyzeEvent>()
     val event = _event.asSharedFlow()
 
-    private var photoUri: String? = null
+    private lateinit var photoUri: String
     private var isStarted = false
     private var analyzeJob: Job? = null
     private var registerJob: Job? = null
@@ -54,7 +54,7 @@ class AnalyzeViewModel @Inject constructor(
     }
 
     /** Root 가 화면에 다시 들어올 때마다 보내므로 첫 번째만 받는다. */
-    private fun start(photoUri: String?) {
+    private fun start(photoUri: String) {
         if (isStarted) return
         isStarted = true
         this.photoUri = photoUri

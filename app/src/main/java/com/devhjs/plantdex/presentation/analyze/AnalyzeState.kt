@@ -8,7 +8,7 @@ sealed interface AnalyzeState {
     data class Success(
         val plant: Plant,
         val nextDexNumber: Int,
-        val photoUri: String?,
+        val photoUri: String,
     ) : AnalyzeState
 
     data class Error(val error: AnalysisError) : AnalyzeState

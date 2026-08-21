@@ -244,7 +244,11 @@ private fun AnalyzeScreenLoadingPreview() {
 private fun AnalyzeScreenSuccessPreview() {
     PlantDexTheme {
         AnalyzeScreen(
-            state = AnalyzeState.Success(PreviewPlant, nextDexNumber = 5, photoUri = null),
+            state = AnalyzeState.Success(
+                PreviewPlant,
+                nextDexNumber = 5,
+                photoUri = "preview",
+            ),
             onAction = {},
         )
     }

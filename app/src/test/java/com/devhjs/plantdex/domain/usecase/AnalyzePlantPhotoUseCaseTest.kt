@@ -173,12 +173,4 @@ class AnalyzePlantPhotoUseCaseTest {
         verify(exactly = 0) { clock.now() }
     }
 
-    @Test
-    fun `사진 위치가 없으면 읽지도 분석하지도 않는다`() = runTest {
-        val result = subject(null)
-
-        assertEquals(AnalysisError.PhotoUnavailable, (result as Result.Error).error)
-        coVerify(exactly = 0) { photoLoader.load(any()) }
-        coVerify(exactly = 0) { analyzer.analyze(any()) }
-    }
 }

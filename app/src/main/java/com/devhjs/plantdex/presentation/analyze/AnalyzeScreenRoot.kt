@@ -12,7 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 fun AnalyzeScreenRoot(
-    photoUri: String?,
+    photoUri: String,
     onRegistered: (Long) -> Unit,
     onRetake: () -> Unit,
     modifier: Modifier = Modifier,

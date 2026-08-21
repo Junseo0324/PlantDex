@@ -47,7 +47,7 @@ import com.devhjs.plantdex.presentation.designsystem.AppSpacing
 
 @Composable
 fun CameraScreenRoot(
-    onCaptured: (photoUri: String?) -> Unit,
+    onCaptured: (photoUri: String) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CameraViewModel = hiltViewModel(),

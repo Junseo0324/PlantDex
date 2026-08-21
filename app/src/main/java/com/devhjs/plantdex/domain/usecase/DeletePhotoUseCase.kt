@@ -6,8 +6,5 @@ import javax.inject.Inject
 class DeletePhotoUseCase @Inject constructor(
     private val photoStore: PhotoStore,
 ) {
-    suspend operator fun invoke(photoUri: String?) {
-        if (photoUri == null) return
-        photoStore.delete(photoUri)
-    }
+    suspend operator fun invoke(photoUri: String) = photoStore.delete(photoUri)
 }

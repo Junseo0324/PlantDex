@@ -15,8 +15,8 @@ class AnalyzePlantPhotoUseCase @Inject constructor(
     private val analyzer: PlantAnalyzer,
     private val clock: Clock,
 ) {
-    suspend operator fun invoke(photoUri: String?): Result<Plant, AnalysisError> {
-        val photo = photoUri?.let { photoLoader.load(it) }
+    suspend operator fun invoke(photoUri: String): Result<Plant, AnalysisError> {
+        val photo = photoLoader.load(photoUri)
             ?: return Result.Error(AnalysisError.PhotoUnavailable)
 
         return analyzer.analyze(photo).map { it.toPlant(discoveredAt = clock.now()) }
