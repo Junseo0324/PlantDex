@@ -1,6 +1,7 @@
 package com.devhjs.plantdex.presentation.component
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devhjs.plantdex.R
@@ -24,14 +29,16 @@ import com.devhjs.plantdex.presentation.designsystem.PlantDexTheme
 /**
  * 갤러리 · 셔터 · 전환 한 줄.
  *
- * 갤러리와 전환은 디자인에만 있고 아직 동작이 없어서 clickable 을 붙이지 않는다.
- * 눌리는 것처럼 보이면 안 되기 때문. 기능이 생기면 콜백을 파라미터로 받는다.
+ * 갤러리는 아직 동작이 없어서 clickable 을 붙이지 않는다. 콜백이 생기면 붙인다.
  */
 @Composable
 fun CameraBottomBar(
     onShutter: () -> Unit,
+    onFlipLens: () -> Unit,
     shutterContentDescription: String,
+    flipContentDescription: String,
     modifier: Modifier = Modifier,
+    isShutterEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -54,12 +61,16 @@ fun CameraBottomBar(
         CameraShutterButton(
             onClick = onShutter,
             contentDescription = shutterContentDescription,
+            enabled = isShutterEnabled,
         )
 
         Box(
             modifier = Modifier
                 .size(46.dp)
-                .border(1.5.dp, AppColors.OnDark.copy(alpha = 0.4f), CircleShape),
+                .clip(CircleShape)
+                .border(1.5.dp, AppColors.OnDark.copy(alpha = 0.4f), CircleShape)
+                .clickable(role = Role.Button, onClick = onFlipLens)
+                .semantics { contentDescription = flipContentDescription },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -78,8 +89,25 @@ private fun CameraBottomBarPreview() {
     PlantDexTheme {
         CameraBottomBar(
             onShutter = {},
+            onFlipLens = {},
             shutterContentDescription = "촬영",
+            flipContentDescription = "전후면 전환",
             modifier = Modifier.padding(horizontal = 44.dp, vertical = 26.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF221E1A, widthDp = 390)
+@Composable
+private fun CameraBottomBarCapturingPreview() {
+    PlantDexTheme {
+        CameraBottomBar(
+            onShutter = {},
+            onFlipLens = {},
+            shutterContentDescription = "촬영",
+            flipContentDescription = "전후면 전환",
+            modifier = Modifier.padding(horizontal = 44.dp, vertical = 26.dp),
+            isShutterEnabled = false,
         )
     }
 }

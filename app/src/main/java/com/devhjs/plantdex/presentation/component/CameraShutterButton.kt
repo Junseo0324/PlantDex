@@ -24,19 +24,23 @@ fun CameraShutterButton(
     onClick: () -> Unit,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .size(78.dp)
             .border(3.dp, AppColors.OnDark, CircleShape)
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
                 .size(62.dp)
-                .background(AppColors.Terracotta, CircleShape),
+                .background(
+                    color = if (enabled) AppColors.Terracotta else AppColors.TerracottaPress,
+                    shape = CircleShape,
+                ),
         )
     }
 }
@@ -49,6 +53,20 @@ private fun CameraShutterButtonPreview() {
             onClick = {},
             contentDescription = "촬영",
             modifier = Modifier.padding(AppSpacing.screenH),
+        )
+    }
+}
+
+/** 촬영이 끝날 때까지 다시 눌리지 않는다. */
+@Preview(showBackground = true, backgroundColor = 0xFF221E1A)
+@Composable
+private fun CameraShutterButtonCapturingPreview() {
+    PlantDexTheme {
+        CameraShutterButton(
+            onClick = {},
+            contentDescription = "촬영",
+            modifier = Modifier.padding(AppSpacing.screenH),
+            enabled = false,
         )
     }
 }
