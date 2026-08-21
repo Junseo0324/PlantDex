@@ -7,6 +7,9 @@ sealed interface AnalysisError {
 
     /** 사진에서 식물을 찾지 못함 — 재시도가 아니라 재촬영이 필요하다. */
     data object NotAPlant : AnalysisError
+
+    /** 사진 파일을 읽지 못함 — 분석기에 보내볼 것 자체가 없다. */
+    data object PhotoUnavailable : AnalysisError
     data object MalformedResponse : AnalysisError
     data class Unknown(val cause: Throwable? = null) : AnalysisError
 }
