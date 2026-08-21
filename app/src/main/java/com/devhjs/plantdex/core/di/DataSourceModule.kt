@@ -1,6 +1,8 @@
 package com.devhjs.plantdex.core.di
 
+import com.devhjs.plantdex.data.datasource.AndroidPhotoLoader
 import com.devhjs.plantdex.data.datasource.MockPlantAnalyzer
+import com.devhjs.plantdex.domain.datasource.PhotoLoader
 import com.devhjs.plantdex.domain.datasource.PlantAnalyzer
 import dagger.Binds
 import dagger.Module
@@ -16,4 +18,7 @@ abstract class DataSourceModule {
 
     @Binds
     abstract fun bindPlantAnalyzer(analyzer: MockPlantAnalyzer): PlantAnalyzer
+
+    @Binds
+    abstract fun bindPhotoLoader(loader: AndroidPhotoLoader): PhotoLoader
 }
