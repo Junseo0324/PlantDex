@@ -52,6 +52,8 @@
     <!-- 에러 -->
     <string name="error_not_a_plant_title">식물이 아닌 것 같아요</string>
     <string name="error_not_a_plant_body">식물이 화면에 잘 담기도록 다시 찍어주세요.</string>
+    <string name="error_photo_unavailable_title">사진을 불러오지 못했어요</string>
+    <string name="error_photo_unavailable_body">사진이 지워졌을 수 있어요. 다시 촬영해주세요.</string>
     <string name="error_network_title">연결에 문제가 있어요</string>
     <string name="error_network_body">네트워크 상태를 확인한 뒤 다시 시도해주세요.</string>
     <string name="error_generic_title">분석에 실패했어요</string>
